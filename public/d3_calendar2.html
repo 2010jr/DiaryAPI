@@ -69,10 +69,14 @@
 				</style>
 		</head>
 		<body>
+				<script src="/bundle.js"></script>
 				<div id="chart" class="clearfix"></div>
 				<div id="chart2" class=clearfix"></div>
 				<script src="http://d3js.org/d3.v3.js"></script>
 				<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+				<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+				<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+				<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 				<script>
 						var util = function() {
 								return {
@@ -97,7 +101,6 @@
 								.attr("height", height)
 								.attr("class", "RdYlGn")
 								.append("g");
-								console.log(svg);
 							
 								var day_group = svg.selectAll("g")
 								.data(function(d) { 
@@ -276,6 +279,7 @@
 								return t0.toString().split(" ")[3];
 						}
 				</script>
+				<div id="diary-space"></div>
 				<button id="back">back</button>
 				<button id="forward">forward</button>
 		</body>
