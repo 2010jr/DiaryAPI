@@ -7,13 +7,15 @@ var DiaryForm = require('./DiaryForm.react');
 var CalendarView = React.createClass({
 		getDefaultProps: function() {
 				return {
-				};
+						url: React.PropTypes.string.isRequired,
+						user: React.PropTypes.string.isRequired
+				}
 		},
 
 	    getInitialState: function() {
 				return {
 						tdate: new Date(),
-						valtype: ""
+						valtype: "",
 				};
 		},
 
@@ -23,6 +25,12 @@ var CalendarView = React.createClass({
 		},
 
 		componentDidMount: function() {
+				var thisProps = this.props;
+				var test = d3.range(9).map(function(d) { return "q" + d + "-9";});
+				var color = d3.scale.quantize()
+						.domain([1, 5])
+						.range(d3.range(9).map(function(d) { return "q" + d + "-9"; }));
+
 				var d3CalendarMonthRect = function(selector,sdate, edate, cellsize) {
 				var width = cellsize * 7; 
 				var height = cellsize * (6 + 1); //including month title
@@ -95,6 +103,23 @@ var CalendarView = React.createClass({
 										<DiaryForm {...props} />
 										,document.getElementById('diary-space'));
 				});
+				
+				var reqUrl = thisProps.url + "/" + thisProps.user + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
+					dataSet = d3.json(reqUrl, function(error, json) { 
+							if ( null != error) {
+								console.log(error);
+								return;
+							}	
+							var data = d3.nest()
+								.key(function(d) { return d.date;})
+								.map(json);
+
+							console.log(data);
+							rect.filter(function(d) { return d in data;})
+								.attr("class", function(d) { return "day " + color(data[d][0]["eval1"]);})
+								.select("title");
+							
+					});	
 				};
 			
 				var sDate = d3Util.date_format(new Date(d3Util.year(this.state.tdate), parseInt(d3Util.month(this.state.tdate)) - 1, 1));

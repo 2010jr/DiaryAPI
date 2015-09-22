@@ -17,6 +17,17 @@ router = function(app, server) {
 	app.get('/', function(req, res) {
 		res.redirect('/d3_calendar2.html');
 	});
+	app.get('/diary/:_user?', function(req, res) {
+		var criteria = { user : req.params._user };
+		for( var props in req.query) {
+			if (req.query.hasOwnProperty(props)) {
+				console.log(req.query[props]);
+				criteria[props] = req.query[props];
+			}
+		}
+		console.log("criteria : " + criteria);
+		mongo.find('diary', criteria, {}, function(list) { res.json(list);});
+	});	
 	app.get('/diary/:_user/:_date', function(req, res) {
 		mongo.find('diary', { user: req.params._user, date: req.params._date }, {}, 
 			function(list) {

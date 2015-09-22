@@ -1,5 +1,6 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
+var jQuery = require('jquery');
 
 var DiaryForm = React.createClass({
 		propTypes: {
