@@ -72,8 +72,8 @@ var DiaryForm = React.createClass({
 									   </div>;
 							 })
 							}
-							<button type="submit" className="btn btn-primary" onClick={this.onClickSubmit}>Submit</button>
-							<button type="submit" className="btn btn-default" onClick={this.onClickCancel}>Cancel</button>	
+							<button className="btn btn-primary" onClick={this.onClickSubmit}>Submit</button>
+							<button className="btn btn-default" onClick={this.onClickCancel}>Cancel</button>	
 			          </form>;
 		}
 });

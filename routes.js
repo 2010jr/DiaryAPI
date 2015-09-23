@@ -7,6 +7,7 @@ var express = require('express');
 
 router = function(app, server) {
 	app.use(body_parser.urlencoded({ extended: false }));
+	app.use(body_parser.json());
 	app.use(express.static(__dirname + '/public'));	
 	
 	app.all('/*', function(req, res, next) {
@@ -74,16 +75,19 @@ router = function(app, server) {
 		);
 	});
 	
-	app.get('/goals/:_user/:_type(year\|month\|week)/:_date', function(req,res) {
-		mongo.find('goals', { name: req.params._user, type: req.params._type, date: req.params._date }, {}, 
+	app.get('/goal/:_user/:_type(year\|month\|week)/:_date', function(req,res) {
+		console.log(req.params);
+		mongo.find('goals', { user : req.params._user, type: req.params._type, date: req.params._date }, {}, 
 			function(list) {
 				res.json(list);
 			}
 		);
 	});
 
-	app.post('/goals', function(req, res) {
+	app.post('/goal', function(req, res) {
 		//重複チェックが必要
+		console.log("goal post invoked");
+		console.log(req.body);
 		mongo.insert('goals', req.body , {}, 
 			function(result) {
 				res.send(result);

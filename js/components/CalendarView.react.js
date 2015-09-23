@@ -21,7 +21,7 @@ var CalendarView = React.createClass({
 				return {
 						tdate: new Date(),
 						valtype: "",
-						cellsize: 40,
+						cellsize: 50,
 				};
 		},
 
