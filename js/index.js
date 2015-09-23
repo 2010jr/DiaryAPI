@@ -10,5 +10,5 @@ props.user = "kusahana";
 
 var calendarView = React.render(
 				<CalendarView {...props} />
-				, document.getElementById("calendar"));
+				, document.getElementById("calendar-month-view"));
 

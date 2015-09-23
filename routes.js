@@ -35,11 +35,39 @@ router = function(app, server) {
 			}
 		);
 	});
-	
+	app.get('/template/:_user/:_templateName', function(req, res) {
+		mongo.find('template', { user: req.params._user, templateName: req.params._templateName}, {},
+			function(list) {
+				res.json(list);
+			}
+		);
+	});
+	app.get('/template/:_user?', function(req, res) {
+		var criteria = { user : req.params._user };
+		for( var props in req.query) {
+			if (req.query.hasOwnProperty(props)) {
+				console.log(req.query[props]);
+				criteria[props] = req.query[props];
+			}
+		}
+		console.log("criteria : " + criteria);
+		mongo.find('template', criteria, {}, function(list) { res.json(list);});
+	});	
+
 	app.post('/diary', function(req, res) {
 		//重複チェックが必要
 		console.log(req.body);
 		mongo.insert('diary', req.body , {}, 
+			function(result) {
+				res.send(result);
+			}
+		);
+	});
+
+	app.post('/template', function(req, res) {
+		//重複チェックが必要
+		console.log(req.body);
+		mongo.insert('template', req.body , {}, 
 			function(result) {
 				res.send(result);
 			}

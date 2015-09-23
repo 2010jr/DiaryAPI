@@ -5,10 +5,15 @@ var d3 = require('d3');
 var DiaryForm = require('./DiaryForm.react');
 
 var CalendarView = React.createClass({
+		propTypes: { 
+						url: React.PropTypes.string.isRequired,
+						user: React.PropTypes.string.isRequired,
+						rootSelector: React.PropTypes.string.isRequired
+		},
+
 		getDefaultProps: function() {
 				return {
-						url: React.PropTypes.string.isRequired,
-						user: React.PropTypes.string.isRequired
+						rootSelector: "CalendarView" 
 				}
 		},
 
@@ -16,115 +21,88 @@ var CalendarView = React.createClass({
 				return {
 						tdate: new Date(),
 						valtype: "",
+						cellsize: 40,
 				};
 		},
 
+		handleDateChange: function(event) {
+				this.setState({
+						tdate: d3Util.month_format.parse(event.target.value)
+				});
+		},
+
 		render: function() {
-				return <div id="selector"> </div>;
-				
+				return <div>
+						<div className="form-inline">
+							<div className="form-group">
+								<label>Month</label>
+								<input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleDateChange}></input>
+							</div>
+						</div>
+						<div id={this.props.rootSelector}></div>
+					   </div>;
 		},
 
 		componentDidMount: function() {
 				var thisProps = this.props;
-				var test = d3.range(9).map(function(d) { return "q" + d + "-9";});
+				var thisState = this.state;
 				var color = d3.scale.quantize()
 						.domain([1, 5])
 						.range(d3.range(9).map(function(d) { return "q" + d + "-9"; }));
 
-				var d3CalendarMonthRect = function(selector,sdate, edate, cellsize) {
-				var width = cellsize * 7; 
-				var height = cellsize * (6 + 1); //including month title
-				var svg = d3.select(selector).selectAll("svg")
-						.data(d3.time.months(d3Util.date_format.parse(sdate), d3Util.date_format.parse(edate)))
-						.enter().append("svg")
-						.attr("width", width)
-						.attr("height", height)
-						.attr("class", "RdYlGn")
-						.append("g");
+				var d3CalendarMonthRect = function(selector,sDate, eDate, cellsize) {
+						var svg = d3Util.buildCalendarSvg(selector,sDate, eDate, cellsize);
+						var weekTitle = d3Util.buildWeekTitle(svg, cellsize);
+						var dayGroup = d3Util.buildDayGroup(svg);
+						var rect = d3Util.buildRect(dayGroup, cellsize); 
+						var daytext = d3Util.buildDayText(dayGroup, cellsize);
+						var tooltipRect = d3Util.buildToolTip(rect, "click", function(d) {
+								var props = {};
+								props.url = "http://192.168.33.13:3000/diary";
+								props.user = "kusahana";
+								props.evals = [ {name: "goal1" , label: "goal1"}, {name: "goal2", label:"goal2"}];
+								props.comments = [ {name: "comments", label: "comments"}, {name: "comments2", label: "comments2"}];
+								props.name = "DiaryForm";
+								props.tdate = d;
+								console.log(d);
+								console.log(thisProps.url + "/" + thisProps.user + "/" + d);
+								var dataset = d3.json(thisProps.url + "/" + thisProps.user + "/" + d, function(error, json) { 
+										if ( null != error) {
+												console.log(error);
+												return;
+										}
+										console.log(json);
+										return json;});
+								console.log(dataset);
+								var dForm = React.render(
+												<DiaryForm {...props} />
+												,document.getElementById('diary-view'));
+						});
 
-				var dayGroup = svg.selectAll("g")
-						.data(function(d) { 
-							var next_month = parseInt(d3Util.month(d)) + 1;
-							var next_year = next_month > 12 ? parseInt(d3Util.year(d)) + 1 : parseInt(d3Util.year(d));
-							next_month = next_month % 13;
-							return d3.time.days(d, new Date(next_year, next_month -1, 1));
-						})
-				.enter().append("g");
+						var reqUrl = thisProps.url + "/" + thisProps.user + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
+						var	dataSet = d3.json(reqUrl, function(error, json) { 
+								if ( null != error) {
+										console.log(error);
+										return;
+								}	
+								var data = d3.nest()
+										.key(function(d) { return d.date;})
+										.map(json);
 
-				var rect = dayGroup 
-						.append("rect")
-						.attr("class", "day")
-						.attr("width", cellsize)
-						.attr("height", cellsize)
-						.attr("x", function(d) {
-								return parseInt(d3Util.day(d)) * cellsize; 
-						})
-						.attr("y", function(d) { 
-								var year = parseInt(d3Util.year(d)),
-									month = parseInt(d3Util.month(d));
-								var week_diff = parseInt(d3Util.week(d)) - parseInt(d3Util.week(new Date(year,month-1,1)));
-								return cellsize + (week_diff*cellsize); 
-						})
-						.datum(d3Util.date_format);
-
-				var daytext = dayGroup 
-						.append("text")
-						.attr("x", function(d) {
-								return parseInt(d3Util.day(d)) * cellsize + cellsize * 0.3;
-						})
-						.attr("y", function(d) { 
-								var year = parseInt(d3Util.year(d)),
-									month = parseInt(d3Util.month(d));
-								var week_diff = parseInt(d3Util.week(d)) - parseInt(d3Util.week(new Date(year,month-1,1)));
-								return cellsize + week_diff * cellsize + cellsize * 0.6; 
-						})
-						.attr("class", "day-title")
-								.text( function(d) { return d3Util.day_of_month(d)});
-
-				var month_titles = svg  // Jan, Feb, Mar and the whatnot
-						.append("text")
-						.attr("width",cellsize)
-						.attr("height", cellsize)
-						.attr("x", 0) 
-						.attr("y", cellsize * 0.5)
-						.attr("class", "month-title")
-						.text(function(d) { return d3Util.year(d) + "/" + d3Util.month(d)});
-				
-				// ToolTip
-				rect.on("click", function(d) {
-						var props = {};
-						props.url = "http://192.168.33.13:3000/diary";
-						props.user = "kusahana";
-						props.evals = [ {name: "goal1" , label: "goal1"}, {name: "goal2", label:"goal2"}];
-						props.comments = [ {name: "comments", label: "comments"}, {name: "comments2", label: "comments2"}];
-						props.name = "DiaryForm";
-						props.tdate = d;
-						var dForm = React.render(
-										<DiaryForm {...props} />
-										,document.getElementById('diary-space'));
-				});
-				
-				var reqUrl = thisProps.url + "/" + thisProps.user + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
-					dataSet = d3.json(reqUrl, function(error, json) { 
-							if ( null != error) {
-								console.log(error);
-								return;
-							}	
-							var data = d3.nest()
-								.key(function(d) { return d.date;})
-								.map(json);
-
-							console.log(data);
-							rect.filter(function(d) { return d in data;})
-								.attr("class", function(d) { return "day " + color(data[d][0]["eval1"]);})
-								.select("title");
-							
-					});	
+								rect.filter(function(d) { return d in data;})
+										.attr("class", function(d) { return "day " + color(data[d][0]["eval1"]);})
+										.select("title");
+						});	
 				};
-			
-				var sDate = d3Util.date_format(new Date(d3Util.year(this.state.tdate), parseInt(d3Util.month(this.state.tdate)) - 1, 1));
-				var eDate = d3Util.date_format(new Date(d3Util.year(this.state.tdate), parseInt(d3Util.month(this.state.tdate)) - 1 + 1, 1));
-				d3CalendarMonthRect("#selector",sDate, eDate,50);
+				var sDate = d3Util.date_format(d3Util.nextMonthFirstDate(this.state.tdate));
+				var eDate = d3Util.date_format(d3Util.thisMonthFirstDate(this.state.tdate));
+				d3CalendarMonthRect("#" + this.props.rootSelector,sDate, eDate,this.state.cellsize);
+		},
+
+		componentDidUpdate: function() {
+				d3.select("#" + this.props.rootSelector).selectAll("svg").selectAll("g").remove();
+				d3.select("#" + this.props.rootSelector).selectAll("svg").remove();
+				this.componentDidMount();
 		}
 });
 
