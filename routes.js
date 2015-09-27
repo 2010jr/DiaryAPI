@@ -56,28 +56,27 @@ router = function(app, server) {
 	});	
 
 	app.post('/diary', function(req, res) {
-		//重複チェックが必要
-		console.log(req.body);
-		mongo.insert('diary', req.body , {}, 
-			function(result) {
-				res.send(result);
-			}
-		);
+		var criteria = {
+				user: req.body.user,
+				date: req.body.date
+		};
+		mongo.update('diary', criteria, req.body, function(result) { res.send(result);});
 	});
 
 	app.post('/template', function(req, res) {
 		//重複チェックが必要
 		console.log(req.body);
-		mongo.insert('template', req.body , {}, 
-			function(result) {
-				res.send(result);
-			}
-		);
+		var criteria = { 
+			user: req.body.user,
+			templateId: req.body.templateId
+		};
+
+		mongo.update('template', criteria, req.body, { upsert : true}, function(result) { res.send(result);});
 	});
 	
 	app.get('/goal/:_user/:_type(year\|month\|week\|day\|other)/:_date', function(req,res) {
 		console.log(req.params);
-		mongo.find('goals', { user : req.params._user, type: req.params._type, date: req.params._date }, {}, 
+		mongo.find('goal', { user : req.params._user, type: req.params._type, date: req.params._date }, {}, 
 			function(list) {
 				res.json(list);
 			}
@@ -85,14 +84,13 @@ router = function(app, server) {
 	});
 
 	app.post('/goal', function(req, res) {
-		//重複チェックが必要
+		//重複チェックが必要（重複チェックの条件はユーザと日付）
 		console.log("goal post invoked");
-		console.log(req.body);
-		mongo.insert('goals', req.body , {}, 
-			function(result) {
-				res.send(result);
-			}
-		);
+		var criteria = {
+				user: req.body.user,
+				date: req.body.date
+		};
+		mongo.update('goal', criteria, req.body, { upsert : true}, function(result) { res.send(result);});
 	});
 }
 

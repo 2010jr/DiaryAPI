@@ -30,7 +30,23 @@ function insert(collect_name, document, options, callback) {
 	});
 }	
 
+function update(collect_name, criteria, document, options, callback) {
+	console.log("update invoked");
+	db.collection(collect_name, function(outer_err, collection) {
+		console.log("criteria: ");
+		console.log(criteria);
+		console.log("document: ");
+		console.log(document);
+		console.log("options: ");
+		console.log(options);
+		collection.update(criteria, document, options, function(inner_err, result) {
+				callback(result);
+		});
+	});
+}
+
 module.exports = {
 	find: find,
-	insert: insert
+	insert: insert,
+	update: update
 }
