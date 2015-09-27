@@ -10,6 +10,16 @@ var d3Util = function() {
 				year : d3.time.format("%Y"),
 				date_format : d3.time.format("%Y-%m-%d"),
 				month_format: d3.time.format("%Y-%m"),
+				formatDate: function(date, formatType) { 
+						switch (formatType) {
+								case "year": 
+										return d3Util.year(date);
+								case "month":
+										return d3Util.month_format(date);
+								default:
+										return d3Util.date_format(date);
+						}
+				},
 				nextMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1, 1)},
 				thisMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1 + 1, 1)},
 				buildCalendarSvg: function(selector, sDate, eDate, cellsize) {
