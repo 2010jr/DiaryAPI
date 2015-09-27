@@ -102,6 +102,10 @@ var GoalView = React.createClass({
 						});
 				});	   
 		},
+
+		componentDidUpdate: function() {
+				this.componentDidMount();
+		}
 });
 
 module.exports = GoalView;
