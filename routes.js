@@ -37,7 +37,7 @@ router = function(app, server) {
 		);
 	});
 	app.get('/template/:_user/:_templateName', function(req, res) {
-		mongo.find('template', { user: req.params._user, templateName: req.params._templateName}, {},
+		mongo.find('template', { user: req.params._user, templateName : req.params._templateName}, {},
 			function(list) {
 				res.json(list);
 			}
@@ -68,7 +68,7 @@ router = function(app, server) {
 		console.log(req.body);
 		var criteria = { 
 			user: req.body.user,
-			templateId: req.body.templateId
+			templateName: req.body.templateName
 		};
 
 		mongo.update('template', criteria, req.body, { upsert : true}, function(result) { res.send(result);});

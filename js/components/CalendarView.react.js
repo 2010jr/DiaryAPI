@@ -35,7 +35,6 @@ var CalendarView = React.createClass({
 				return <div>
 						<div className="form-inline">
 							<div className="form-group">
-								<label>Month</label>
 								<input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleDateChange}></input>
 							</div>
 						</div>
@@ -58,7 +57,7 @@ var CalendarView = React.createClass({
 						var daytext = d3Util.buildDayText(dayGroup, cellsize);
 						var tooltipRect = d3Util.buildToolTip(rect, "click", function(d) {
 								var props = {};
-								props.url = "http://192.168.33.13:3000/diary";
+								props.url = "/diary";
 								props.user = "kusahana";
 								props.evals = [ {name: "goal1" , label: "goal1"}, {name: "goal2", label:"goal2"}];
 								props.comments = [ {name: "comments", label: "comments"}, {name: "comments2", label: "comments2"}];

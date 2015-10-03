@@ -10,14 +10,32 @@ var d3Util = function() {
 				year : d3.time.format("%Y"),
 				date_format : d3.time.format("%Y-%m-%d"),
 				month_format: d3.time.format("%Y-%m"),
+				week_format: d3.time.format("%Y-%m-%U"),
 				formatDate: function(date, formatType) { 
 						switch (formatType) {
 								case "year": 
 										return d3Util.year(date);
 								case "month":
 										return d3Util.month_format(date);
+								case "week":
+										var year = d3Util.year(date),
+											month = d3Util.month(date),
+											weekAbs = d3Util.week(date);
+										//上で求めたweekAbsは年単位での週の番号なので、月単位に変換する必要がある
+										var week = parseInt(weekAbs) - parseInt(d3Util.week(new Date(year, month, 1)));
+										return year + "-" + month + "-" + week;
 								default:
 										return d3Util.date_format(date);
+						}
+				},
+				parseToDate : function(str, formatType) { 
+						switch (formatType) {
+								case "year": 
+										return d3Util.year.parse(str);
+								case "month":
+										return d3Util.month_format.parse(str);
+								default:
+										return d3Util.date_format.parse(str);
 						}
 				},
 				nextMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1, 1)},

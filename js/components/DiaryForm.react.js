@@ -19,13 +19,15 @@ var DiaryForm = React.createClass({
 
 		getDefaultProps: function() {
 				return {
-						name: "DiaryForm"
+						name: "DiaryForm",
 				};
 		},
 
 		getInitialState: function() {
 				return {
 						id: 'dairy_form-1',
+						template: 'template',
+						templateNames: [],
 						evalRates: this.props.evals.map(function(x,ind) { return { 
 								id: 'dairy_form_eval-' + ind,
 					   	};}),
@@ -43,17 +45,37 @@ var DiaryForm = React.createClass({
 				console.log("onClick Cancel Called");
 		},
 
+		componentDidMount: function() {
+			jQuery.get("template" + "/" + this.props.user, {}, function(data) {
+					console.log("Diary template data");
+					console.log(data);
+					var templates = [];
+					data.forEach(function(val) {
+							templates.push(val.templateName);
+					});
+					this.setState({templateNames: templates});
+			}.bind(this));
+		},
 		render: function() {
 				// Set variable to access in each map method.(Do not use this keyword in map method)
 				var propsEvals = this.props.evals;
 				var propsComments = this.props.comments; 
 				var reactVal = this;
 				return <form action={this.props.url} method="post">
-							<input type="hidden" name="user" value={this.props.user}/>
-							<label htmlFor="diary_form_tdate">
-								date
-								<input id="diary_form_tdate" className="form-control" name="date" type="date" value={this.props.tdate} />
-							</label>
+							<div className="form-inline">
+								<input type="hidden" name="user" value={this.props.user}/>
+								<label htmlFor="diary_form_tdate">Date
+										<input id="diary_form_tdate" className="form-control" name="date" type="date" value={this.props.tdate} />
+								</label>
+								<label htmlFor="diary_template">Template
+									<select className="form-control" onChange={this.handleTemplateName}> 
+										{this.state.templateNames.map(function(data) {
+											return <option value={data}>{data}</option>;
+										 })
+										};
+									</select>
+								</label>
+							</div>
 							{ this.state.evalRates.map(function(val,ind) {
 								return <div className="form-group">
 										<label htmlFor={val.id}>

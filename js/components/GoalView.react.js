@@ -6,12 +6,14 @@ var GoalView = React.createClass({
 		propTypes: {
 				url: React.PropTypes.string.isRequired,
 				user: React.PropTypes.string.isRequired,
-				goalTypes: React.PropTypes.arrayOf
+				goalTypes: React.PropTypes.arrayOf,
+				goalTemplates: React.PropTypes.arrayOf
 		},
 		
 		getDefaultProps: function() {
 				return {
-						goalTypes: ["year", "month", "week", "day", "other"]
+						goalTypes: ["year", "month", "week", "day", "other"],
+						goalTemplates: ["goal1", "goal2", "goal3", "otherComments"]
 				}
 		},
 
@@ -54,16 +56,22 @@ var GoalView = React.createClass({
 			});
 		},
 
+		handleDateChange: function(event) {
+			var tdate = d3Util.parseToDate(event.target.value, this.state.goalType);
+			this.setState({
+					tdate: tdate
+			});
+		},
+
 		render: function() {
 				return <div className="row"> 
 						<div className="form-inline">
 						<div className="form-group">
-							<label>Date</label>
-							<input type={this.state.goalType === "other" ? "day" : this.state.goalType} className="form-control" value={d3Util.formatDate(this.state.tdate, this.state.goalType)}></input>
+							<input type={this.state.goalType === "other" ? "day" : this.state.goalType} className="form-control" value={d3Util.formatDate(this.state.tdate, this.state.goalType)} onChange={this.handleDateChange}></input>
 							<label>Goal Type</label>
 							<select className="form-control" value={this.state.goalType} onChange={this.handleGoalTypeChange}>
 							{this.props.goalTypes.map(function(val) {
-										return <option value={val}>{val}</option>
+										return <option value={val}>{val}</option>;
 								})
 							};
 							</select>
@@ -90,15 +98,23 @@ var GoalView = React.createClass({
 
 		componentDidMount: function() {
 				var refs = this.refs;
+				var props = this.props;
 				d3.json(this.props.url + "/" + this.props.user + "/" + this.state.goalType + "/" + d3Util.formatDate(this.state.tdate, this.state.goalType), function(error, json) {
+						var data = {};
 						if (null != error) {
 								console.log(error);
 								return;
 						}
-						console.log(json);
+						if (json.length > 0) {
+							data = json[0];	
+						}
 						// Set Data to form value
-						["goal1", "goal2", "goal3", "otherComments"].forEach(function(prop) {
-								React.findDOMNode(refs[prop]).value = null != json[0][prop] ? json[0][prop] : "";
+						props.goalTemplates.forEach(function(prop) {
+								if (data.hasOwnProperty(prop)) {
+									   React.findDOMNode(refs[prop]).value = data[prop];
+								} else {
+									   React.findDOMNode(refs[prop]).value = ""; 
+								}
 						});
 				});	   
 		},
