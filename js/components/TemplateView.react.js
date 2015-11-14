@@ -70,6 +70,31 @@ var TemplateView = React.createClass({
 				});
 		},	
 
+		handleRemove: function(event) {
+				jQuery.ajax({
+						type: "DELETE",
+						url: this.props.url,
+						data: {
+							templateName : React.findDOMNode(this.refs.templateName).value,
+							evaluates : this.state.evaluates,
+							comments : this.state.comments,
+							user: this.props.user
+						},
+						success: function(msg) {
+								console.log(msg);
+						},
+						error: function(msg) {
+								console.log(msg);
+						}
+				});
+		},
+
+		handleRemoveAll: function(event) {
+
+		},
+
+
+
 		componentDidMount: function() {
 				var requestData = {
 						user: this.props.user,
@@ -150,7 +175,9 @@ var TemplateView = React.createClass({
 								})}
 								<div className="form-group">
 									<button className="btn btn-primary" onClick={this.handleSubmit}>Save</button>
-									<button className="btn btn-default">Reset</button>
+									<button className="btn btn-default" onClick={this.handleReset}>Reset</button>
+									<button className="btn btn-danger" onClick={this.handleRemove}>Remove</button>
+									<button className="btn btn-danger" onClick={this.handleRemoveAll}>RemoveAll</button>
 								</div>
 						</div>;
 		}

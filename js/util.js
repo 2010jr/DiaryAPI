@@ -83,7 +83,7 @@ var d3Util = function() {
 				buildRect: function(dayGroup, cellsize) {
 						var rect = dayGroup 
 								.append("rect")
-								.attr("class", "day")
+								.attr("class", "day-off")
 								.attr("width", cellsize)
 								.attr("height", cellsize)
 								.attr("x", function(d) {
@@ -131,7 +131,7 @@ var d3Util = function() {
 				buildToolTip: function(svgObject,tooltipType, callbackFunc) {
 						svgObject.on(tooltipType, callbackFunc);
 						return svgObject;
-				}
+				},
 		}
 }();
 

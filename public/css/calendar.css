@@ -1,5 +1,10 @@
-.day {
+.day-off {
 		fill: #FFFFFF;
 		stroke: #EEEEEE;
+}
+
+.day-on {
+		fill: #FFFFFF;
+		stroke: #111111;
 }
 

@@ -2,10 +2,43 @@
 var router;
 
 var mongo = require('./mongo');
+var ldap = require('./ldap_client');
 var body_parser = require('body-parser');
 var express = require('express');
 
+function basicAuthenticate(req, res, next) {
+	var auth,
+	    login;
+	
+	console.log('req:' + req);
+	if (!req.headers.authorization) {
+		return authenticate(res);
+	}
+	
+	console.log('req.headers.authorization:' + req.headers.authorization);
+	auth = req.headers.authorization.replace(/^Basic /, '');
+	auth = (new Buffer(auth, 'base64')).toString('utf-8');
+	login = auth.split(':');
+
+	ldap.authenticate(login[0], login[1], function(err) {
+			if (!err) {
+					next();
+			} else {
+					authenticate(res);
+			}
+	});
+}
+		
+function authenticate(res) {
+		var realm = "test";
+		res.writeHead(401, {
+				'WWW-Authenticate': 'Basic realm="' + realm + '"'
+		});
+		return res.end('Basic authorization');
+}
+
 router = function(app, server) {
+	app.use(basicAuthenticate);
 	app.use(body_parser.urlencoded({ extended: false }));
 	app.use(body_parser.json());
 	app.use(express.static(__dirname + '/public'));	
@@ -17,6 +50,10 @@ router = function(app, server) {
 	});
 	app.get('/', function(req, res) {
 		res.redirect('/d3_calendar2.html');
+	});
+	app.get('/test/:_user?', function(req,res) {
+		console.log("start using ldap");
+		ldap.authenticate("kusahana",'kusahana');
 	});
 	app.get('/diary/:_user?', function(req, res) {
 		var criteria = { user : req.params._user };
@@ -91,6 +128,21 @@ router = function(app, server) {
 				date: req.body.date
 		};
 		mongo.update('goal', criteria, req.body, { upsert : true}, function(result) { res.send(result);});
+	});
+	
+	app.delete('/goal', function(req, res) {
+		console.log("goal delete invoked");
+		mongo.deleteMany('goal', req.body, function(result) { res.send(result)});
+	});	
+
+	app.delete('/template', function(req, res) {
+		console.log("template delete invoked");
+		mongo.deleteMany('template', req.body,function(result) { res.send(result)});
+	});
+
+	app.delete('/diary', function(req, res) {
+		console.log("template delete invoked");
+		mongo.deleteMany('template', req.body,function(result) { res.send(result)});
 	});
 }
 

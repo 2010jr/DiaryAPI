@@ -7,19 +7,13 @@ var DiaryForm = React.createClass({
 				url: React.PropTypes.string,
 				user: React.PropTypes.string,
 				id: React.PropTypes.string,
-				name: React.PropTypes.string.isRequired,
-				evals: React.PropTypes.arrayOf(React.PropTypes.shape( {
-						name: React.PropTypes.string.isRequired
-				})),
-				comments: React.PropTypes.arrayOf(React.PropTypes.shape( {
-						name: React.PropTypes.string.isRequired
-				})),
+				templateName: React.PropTypes.string,
 				tdate: React.PropTypes.string
 		},
 
 		getDefaultProps: function() {
 				return {
-						name: "DiaryForm",
+						templateName: ""
 				};
 		},
 
@@ -28,12 +22,8 @@ var DiaryForm = React.createClass({
 						id: 'dairy_form-1',
 						template: 'template',
 						templateNames: [],
-						evalRates: this.props.evals.map(function(x,ind) { return { 
-								id: 'dairy_form_eval-' + ind,
-					   	};}),
-						commentTexts: this.props.comments.map(function(x,ind) { return { 
-								id: 'dairy_form_comment-' + ind,
-						};})
+						evaluates: [],
+						comments: [],
 				};
 		},
 
@@ -45,57 +35,116 @@ var DiaryForm = React.createClass({
 				console.log("onClick Cancel Called");
 		},
 
+		parseTemplateInfo: function(template) {
+				return template.map(function(val) {
+						var evaluates = val["evaluates[]"],
+						comments = val["comments[]"];
+
+						return {
+								evaluates: Array.isArray(evaluates) ? evaluates: [evaluates],
+								comments: Array.isArray(comments) ? comments: [comments]
+						};
+				       });
+		},
+
 		componentDidMount: function() {
-			jQuery.get("template" + "/" + this.props.user, {}, function(data) {
-					console.log("Diary template data");
-					console.log(data);
-					var templates = [];
-					data.forEach(function(val) {
-							templates.push(val.templateName);
-					});
-					this.setState({templateNames: templates});
+			if(this.props.templateName === "" || this.props.templateName === null) {
+				jQuery.get("template" + "/" + this.props.user, {}, function(data) {
+						var templates = [];
+						data.forEach(function(val) {
+								templates.push(val.templateName);
+						});
+						this.setState({templateNames: templates});
+				}.bind(this));
+			} else {
+				// Get template element
+				jQuery.get("template" + "/" + this.props.user + "/" + this.props.templateName, {}, function(data) {
+						this.state.evaluates = [];
+						this.state.comments = [];
+
+						data.forEach(function(val) {
+								var evaluates = val["evaluates[]"],
+									comments = val["comments[]"];
+								
+								this.setState({
+										evaluates: Array.isArray(evaluates) ? evaluates: [evaluates],
+										comments: Array.isArray(comments) ? comments: [comments]
+								});
+						}.bind(this));	
+				}.bind(this));
+			}
+		},
+
+		handleRemove: function(event) {
+
+		},
+
+		handleRemoveAll: function(event) {
+
+		},
+
+		handlerTemplateChange: function(event) {
+			// Get template information				
+			var templateName = React.findDOMNode(this.refs.templateName).value;
+			console.log("templateName : " + templateName);
+			jQuery.get("template" + "/" + this.props.user,{templateName: templateName}, function(data) {
+				if(data.length == 0) {
+						return;
+				}
+				var newState = this.parseTemplateInfo(data);
+				console.log("new state");
+				console.log(newState);
+				this.setState(newState[0]);	
 			}.bind(this));
+		},
+
+		buildTemplateDropDown: function(templateName, templateNames, handlerChange) {
+				var options;	
+				if( templateName !== "") {
+					options = <option value={templateName}>{templateName}</option>;
+				} else {
+					options = templateNames.map(function(data) {
+							return <option value={data}>{data}</option>;
+					});
+				}
+				return <select className="form-control" ref="templateName" onChange={handlerChange}>
+						{options}
+					   </select>;
 		},
 		render: function() {
 				// Set variable to access in each map method.(Do not use this keyword in map method)
-				var propsEvals = this.props.evals;
-				var propsComments = this.props.comments; 
-				var reactVal = this;
 				return <form action={this.props.url} method="post">
 							<div className="form-inline">
 								<input type="hidden" name="user" value={this.props.user}/>
-								<label htmlFor="diary_form_tdate">Date
-										<input id="diary_form_tdate" className="form-control" name="date" type="date" value={this.props.tdate} />
-								</label>
-								<label htmlFor="diary_template">Template
-									<select className="form-control" onChange={this.handleTemplateName}> 
-										{this.state.templateNames.map(function(data) {
-											return <option value={data}>{data}</option>;
-										 })
-										};
-									</select>
+								<input id="diary_form_tdate" className="form-control" name="date" type="date" value={this.props.tdate} />
+								<label>Template
+									{this.buildTemplateDropDown(this.props.templateName, this.state.templateNames, this.handlerTemplateChange)} 
 								</label>
 							</div>
-							{ this.state.evalRates.map(function(val,ind) {
+							{this.state.evaluates.map(function(val,ind) {
 								return <div className="form-group">
-										<label htmlFor={val.id}>
-									   		{propsEvals[ind].name}
-									   		<input id={val.id} className="form-control" type="text" ref={val.id} name={propsEvals[ind].name}/> 
-									   </label>
+										<label>{val}
+									   		<select className="form-control" ref={val}>
+													{[1,2,3,4,5].map(function(num) {
+															return <option value={num}>{num}</option>;
+													})}
+											</select>
+									   	</label>
 									   </div>;
-							 })
+							 }.bind(this))
 							}
-							{ this.state.commentTexts.map(function(val,ind) {
+							{ this.state.comments.map(function(val,ind) {
 								return <div className="form-group">
-										<label htmlFor={val.id}>
-									   	{propsComments[ind].name}
-									   	<textarea id={val.id} className="form-control" type="text" ref={val.id} name={propsComments[ind].name}/> 
+										<label>{val}
+									   	<textarea className="form-control" type="text" ref={val}/> 
 									   </label>
 									   </div>;
 							 })
 							}
 							<button className="btn btn-primary" onClick={this.onClickSubmit}>Submit</button>
 							<button className="btn btn-default" onClick={this.onClickCancel}>Cancel</button>	
+							<button className="btn btn-danger" onClick={this.handleRemove}>Remove</button>
+							<button className="btn btn-danger" onClick={this.handleRemoveAll}>RemoveAll</button>	
 			          </form>;
 		}
 });

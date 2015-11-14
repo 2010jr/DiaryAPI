@@ -31,11 +31,21 @@ var CalendarView = React.createClass({
 				});
 		},
 
+		handleRemove: function(event) {
+				console.log("test");
+		},
+
+		handleRemoveAll: function(event) {
+				console.log("test");
+		},
+
 		render: function() {
 				return <div>
 						<div className="form-inline">
 							<div className="form-group">
 								<input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleDateChange}></input>
+								<button className="btn btn-danger" onClick={this.handleRemove}>Remove</button>
+								<button className="btn btn-danger" onClick={this.handleRemoveAll}>RemoveAll</button>
 							</div>
 						</div>
 						<div id={this.props.rootSelector}></div>
@@ -63,8 +73,6 @@ var CalendarView = React.createClass({
 								props.comments = [ {name: "comments", label: "comments"}, {name: "comments2", label: "comments2"}];
 								props.name = "DiaryForm";
 								props.tdate = d;
-								console.log(d);
-								console.log(thisProps.url + "/" + thisProps.user + "/" + d);
 								var dataset = d3.json(thisProps.url + "/" + thisProps.user + "/" + d, function(error, json) { 
 										if ( null != error) {
 												console.log(error);
@@ -77,7 +85,16 @@ var CalendarView = React.createClass({
 												<DiaryForm {...props} />
 												,document.getElementById('diary-view'));
 						});
+						
+						rect.on("mouseover", function(d) {
+							var className = d3.select(this).attr("class");
+							d3.select(this).attr("class",className.replace("day-off", "day-on"));
+						});
 
+						rect.on("mouseout", function(d) {
+							var className = d3.select(this).attr("class");
+							d3.select(this).attr("class",className.replace("day-on", "day-off"));
+						});
 						var reqUrl = thisProps.url + "/" + thisProps.user + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
 						var	dataSet = d3.json(reqUrl, function(error, json) { 
 								if ( null != error) {
@@ -89,7 +106,7 @@ var CalendarView = React.createClass({
 										.map(json);
 
 								rect.filter(function(d) { return d in data;})
-										.attr("class", function(d) { return "day " + color(data[d][0]["eval1"]);})
+										.attr("class", function(d) { return "day-off " + color(data[d][0]["eval1"]);})
 										.select("title");
 						});	
 				};
