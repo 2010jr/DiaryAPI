@@ -63,14 +63,6 @@ var GoalView = React.createClass({
 			});
 		},
 
-		handleRemove: function(event) {
-
-		},
-
-		handleRemoveAll: function(event) {
-
-		},
-
 		render: function() {
 				return <div className="row"> 
 						<div className="form-inline">
@@ -100,8 +92,6 @@ var GoalView = React.createClass({
 					 <div className="form-group">
 					 	<button className="btn btn-primary" name="Submit" onClick={this.handleSubmit}>Submit</button>
 						<button className="btn btn-default" name="Reset" onClick={this.handleReset}>Reset</button>
-					 	<button className="btn btn-danger" name="Remove" onClick={this.handleRemove}>Remove</button>
-						<button className="btn btn-danger" name="RemoveAll" onClick={this.handleRemoveAll}>RemoveAll</button>
 					 </div>
 					</div>;
 		},

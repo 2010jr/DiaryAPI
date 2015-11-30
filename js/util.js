@@ -128,10 +128,16 @@ var d3Util = function() {
 						return month_titles;
 				},
 
-				buildToolTip: function(svgObject,tooltipType, callbackFunc) {
-						svgObject.on(tooltipType, callbackFunc);
-						return svgObject;
-				},
+				buildToolTip: function(selector,tooltipType, id) {
+						return d3.select(selector)
+								.append("div")
+								.attr("id", id)
+								.attr("class", "tooltip")
+								.style("position", "absolute")
+								.style("z-index", "10")
+								.style("visibility", "hidden")
+								.text("a simple tooltip");
+				}
 		}
 }();
 

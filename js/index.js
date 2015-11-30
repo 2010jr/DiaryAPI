@@ -10,19 +10,27 @@ var props = {};
 props.url = "/diary";
 props.user = "kusahana";
 
-var calendarView = React.render(
-				<CalendarView {...props} />
-				, document.getElementById("calendar-month-view"));
+document.getElementById("nav-menu-diary").onclick = function() {
+		React.render(
+						<DiaryForm {...props} />
+						, document.getElementById("container-view")
+		);
+		return false;
+};
 
-var goalView = React.render(
-				<GoalView {...{user: "kusahana", url:"/goal"}} />
-				, document.getElementById("goal-view"));
+document.getElementById("nav-menu-calendar").onclick = function() {
+		React.render(
+						<CalendarView {...props} />
+						, document.getElementById("container-view")
+		);
+		return false;
+};
 
-var diaryView = React.render(
-				<DiaryForm {...props} />
-				, document.getElementById("diary-view"));
-
-var templateView = React.render(
-				<TemplateView {...{user: "kusahana", url:"/template", template: "Template"}} />
-				, document.getElementById("template-view"));
+document.getElementById("nav-menu-goal").onclick = function() {
+		React.render(
+						<GoalView {...{user: "kusahana", url:"/goal"}} />
+						, document.getElementById("container-view")
+					);
+		return false;
+};
 

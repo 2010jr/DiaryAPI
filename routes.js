@@ -112,6 +112,7 @@ router = function(app, server) {
 	});
 	
 	app.get('/goal/:_user/:_type(year\|month\|week\|day\|other)/:_date', function(req,res) {
+		console.log("get goal invoked");
 		console.log(req.params);
 		mongo.find('goal', { user : req.params._user, type: req.params._type, date: req.params._date }, {}, 
 			function(list) {
