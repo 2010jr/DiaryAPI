@@ -64,7 +64,7 @@ var GoalView = React.createClass({
 		},
 
 		render: function() {
-				return <div className="row"> 
+				return  <div> 
 						<div className="form-inline">
 						<div className="form-group">
 							<input type={this.state.goalType === "other" ? "day" : this.state.goalType} className="form-control" value={d3Util.formatDate(this.state.tdate, this.state.goalType)} onChange={this.handleDateChange}></input>
@@ -93,7 +93,7 @@ var GoalView = React.createClass({
 					 	<button className="btn btn-primary" name="Submit" onClick={this.handleSubmit}>Submit</button>
 						<button className="btn btn-default" name="Reset" onClick={this.handleReset}>Reset</button>
 					 </div>
-					</div>;
+				   </div>;
 		},
 
 		componentDidMount: function() {

@@ -38,7 +38,7 @@ function authenticate(res) {
 }
 
 router = function(app, server) {
-	app.use(basicAuthenticate);
+	//app.use(basicAuthenticate);
 	app.use(body_parser.urlencoded({ extended: false }));
 	app.use(body_parser.json());
 	app.use(express.static(__dirname + '/public'));	
@@ -97,7 +97,7 @@ router = function(app, server) {
 				user: req.body.user,
 				date: req.body.date
 		};
-		mongo.update('diary', criteria, req.body, function(result) { res.send(result);});
+		mongo.update('diary', criteria, req.body, { upsert : true} , function(result) { res.send(result);});
 	});
 
 	app.post('/template', function(req, res) {

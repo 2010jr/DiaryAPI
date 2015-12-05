@@ -32,8 +32,15 @@ function insert(collect_name, document, options, callback) {
 
 function update(collect_name, criteria, document, options, callback) {
 	console.log("update invoked");
+	console.log(collect_name);
+	console.log(criteria);
+	console.log(document);
+	console.log(options);
 	db.collection(collect_name, function(outer_err, collection) {
 		collection.update(criteria, document, options, function(inner_err, result) {
+				if(null != inner_err) {
+						console.log(inner_err);
+				}
 				callback(result);
 		});
 	});

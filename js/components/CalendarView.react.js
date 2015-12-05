@@ -23,7 +23,7 @@ var CalendarView = React.createClass({
 						valtype: "",
 						cellsize: 50,
 						goals: ["Goal1", "Goal2", "Goal3"],
-						activeGoal : "Goal1",
+						activeGoalInd : 0,
 				};
 		},
 
@@ -43,7 +43,7 @@ var CalendarView = React.createClass({
 
 		handleChangeGoal: function(ind) {
 				this.setState({
-						activeGoal: this.state.goals[ind]
+						activeGoalInd: ind 
 				});
 		},
 
@@ -54,10 +54,10 @@ var CalendarView = React.createClass({
 						<input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleDateChange}></input>
 						<ul className="nav nav-pills nav-stacked">
 						{this.state.goals.map(function(val, ind) {
-																		 if (this.state.activeGoal === val) {
-																				 return <li role="presentation" className="active" ><a ref="#" onClick={this.handleChangeGoal.bind(null, ind)}>{"Goal" + (ind+1) + ":"+ val}</a></li>;
+																		 if (this.state.activeGoalInd === ind) {
+																				 return <li role="presentation" className="active" ><a ref="#" onClick={this.handleChangeGoal.bind(null, ind)}>{val}</a></li>;
 																		 } else {
-																				 return <li role="presentation"><a ref="#" onClick={this.handleChangeGoal.bind(null, ind)}>{"Goal" + (ind+1) + ":" + val}</a></li>;
+																				 return <li role="presentation"><a ref="#" onClick={this.handleChangeGoal.bind(null, ind)}>{val}</a></li>;
 																		 }
 																 }.bind(this))
 						}
@@ -68,20 +68,23 @@ var CalendarView = React.createClass({
 						</div>;
 		},
 
-		componentWillMount: function() {
-				d3.json("goal" + "/" + this.props.user + "/" + "month" + "/" + d3Util.formatDate(this.state.tdate, "month"),function(error, json) {
+		getGoalAndUpdate: function(goalType, tdate) {
+				d3.json("goal" + "/" + this.props.user + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType),function(error, json) {
 						if (null != error) {
 								console.log(error);
 								return;
 						}
 						if (json.length > 0) {
 								this.setState({
-										goals: [json[0].goal1, json[0].goal2, json[0].goal3],
-										activeGoal : json[0].goal1
+										goals: [json[0].goal1, json[0].goal2, json[0].goal3]
 								});
 						}
 				}.bind(this));
+		},
 
+
+		componentWillMount: function() {
+				this.getGoalAndUpdate("month", this.state.tdate);
 		},
 
 		componentDidMount: function() {
@@ -93,7 +96,7 @@ var CalendarView = React.createClass({
 						.range(d3.range(9).map(function(d) { return "q" + d + "-9"; }));
 
 				var formatText = function(data) {
-						return "<p>" + data.date + "</p>" + "<p>Evaluate : " + data.eval1 + "</p>" + "<p>Comment : " + data.comments + "</p>";
+						return "<p>" + data.date + "</p>" + "<p>Evaluate : " + data.evaluates[thisState.activeGoalInd]+ "</p>" + "<p>Comment : " + data.comments[thisState.activeGoalInd] + "</p>";
 				};
 
 				var d3CalendarMonthRect = function(selector,sDate, eDate, cellsize) {
@@ -110,12 +113,13 @@ var CalendarView = React.createClass({
 										console.log(error);
 										return;
 								}	
+								console.log(json);
 								var data = d3.nest()
 										.key(function(d) { return d.date;})
 										.map(json);
 
 								rect.filter(function(d) { return d in data;})
-										.attr("class", function(d) { return "day-off " + color(data[d][0]["eval1"]);})
+										.attr("class", function(d) { return "day-off " + color(data[d][0].evaluates[thisState.activeGoalInd]);})
 										.select("title");
 
 								rect.on("mouseover", function(d) {

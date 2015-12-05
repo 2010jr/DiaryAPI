@@ -56,10 +56,10 @@ var d3Util = function() {
 				buildDayGroup: function (svg) {
 						var dayGroup = svg.selectAll("g")
 								.data(function(d) { 
-										var next_month = parseInt(d3Util.month(d)) + 1;
-										var next_year = next_month > 12 ? parseInt(d3Util.year(d)) + 1 : parseInt(d3Util.year(d));
-										next_month = next_month % 13;
-										return d3.time.days(d, new Date(next_year, next_month -1, 1));
+										var thisMonth = parseInt(d3Util.month(d));
+										var nextMonth = thisMonth % 12 + 1; 
+										var nextYear = (thisMonth + 1) > 12 ? parseInt(d3Util.year(d)) + 1 : parseInt(d3Util.year(d));
+										return d3.time.days(d, new Date(nextYear, nextMonth -1, 1));
 								})
 						.enter().append("g");
 						return dayGroup;
