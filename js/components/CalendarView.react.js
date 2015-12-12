@@ -7,7 +7,6 @@ var DiaryForm = require('./DiaryForm.react');
 var CalendarView = React.createClass({
 		propTypes: { 
 				url: React.PropTypes.string.isRequired,
-				user: React.PropTypes.string.isRequired,
 				rootSelector: React.PropTypes.string.isRequired
 		},
 
@@ -69,7 +68,7 @@ var CalendarView = React.createClass({
 		},
 
 		getGoalAndUpdate: function(goalType, tdate) {
-				d3.json("goal" + "/" + this.props.user + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType),function(error, json) {
+				d3.json("goal" + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType),function(error, json) {
 						if (null != error) {
 								console.log(error);
 								return;
@@ -107,7 +106,7 @@ var CalendarView = React.createClass({
 						var daytext = d3Util.buildDayText(dayGroup, cellsize);
 						var tooltip = d3Util.buildToolTip(selector, "tooltip");
 
-						var reqUrl = thisProps.url + "/" + thisProps.user + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
+						var reqUrl = thisProps.url + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
 						var	dataSet = d3.json(reqUrl, function(error, json) { 
 								if ( null != error) {
 										console.log(error);

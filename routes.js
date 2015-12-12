@@ -6,6 +6,15 @@ var ldap = require('./ldap_client');
 var body_parser = require('body-parser');
 var express = require('express');
 
+function extractUserName(req) {
+	if (!req.headers.authorization) {
+			return null;
+	}
+	var auth = req.headers.authorization.replace(/^Basic /, '');
+	var loginInfo = (new Buffer(auth, 'base64')).toString('utf-8').split(':');
+	return loginInfo[0];
+}
+
 function basicAuthenticate(req, res, next) {
 	var auth,
 	    login;
@@ -38,7 +47,7 @@ function authenticate(res) {
 }
 
 router = function(app, server) {
-	//app.use(basicAuthenticate);
+	app.use(basicAuthenticate);
 	app.use(body_parser.urlencoded({ extended: false }));
 	app.use(body_parser.json());
 	app.use(express.static(__dirname + '/public'));	
@@ -51,12 +60,8 @@ router = function(app, server) {
 	app.get('/', function(req, res) {
 		res.redirect('/d3_calendar2.html');
 	});
-	app.get('/test/:_user?', function(req,res) {
-		console.log("start using ldap");
-		ldap.authenticate("kusahana",'kusahana');
-	});
-	app.get('/diary/:_user?', function(req, res) {
-		var criteria = { user : req.params._user };
+	app.get('/diary?', function(req, res) {
+		var criteria = { user : extractUserName(req)};
 		for( var props in req.query) {
 			if (req.query.hasOwnProperty(props)) {
 				console.log(req.query[props]);
@@ -66,22 +71,22 @@ router = function(app, server) {
 		console.log("criteria : " + criteria);
 		mongo.find('diary', criteria, {}, function(list) { res.json(list);});
 	});	
-	app.get('/diary/:_user/:_date', function(req, res) {
-		mongo.find('diary', { user: req.params._user, date: req.params._date }, {}, 
+	app.get('/diary/:_date', function(req, res) {
+		mongo.find('diary', { user: extractUserName(req) , date: req.params._date }, {}, 
 			function(list) {
 				res.json(list);
 			}
 		);
 	});
-	app.get('/template/:_user/:_templateName', function(req, res) {
-		mongo.find('template', { user: req.params._user, templateName : req.params._templateName}, {},
+	app.get('/template/:_templateName', function(req, res) {
+		mongo.find('template', { user: extractUserName(req) , templateName : req.params._templateName}, {},
 			function(list) {
 				res.json(list);
 			}
 		);
 	});
-	app.get('/template/:_user?', function(req, res) {
-		var criteria = { user : req.params._user };
+	app.get('/template?', function(req, res) {
+		var criteria = { user : extractUserName(req)};
 		for( var props in req.query) {
 			if (req.query.hasOwnProperty(props)) {
 				console.log(req.query[props]);
@@ -94,9 +99,12 @@ router = function(app, server) {
 
 	app.post('/diary', function(req, res) {
 		var criteria = {
-				user: req.body.user,
+				user: extractUserName(req), 
 				date: req.body.date
 		};
+		var data = req.body;
+		data.user = extractUserName(req);
+
 		mongo.update('diary', criteria, req.body, { upsert : true} , function(result) { res.send(result);});
 	});
 
@@ -104,17 +112,19 @@ router = function(app, server) {
 		//重複チェックが必要
 		console.log(req.body);
 		var criteria = { 
-			user: req.body.user,
+			user: extractUserName(req), 
 			templateName: req.body.templateName
 		};
+		var data = req.body;
+		data.user = extractUserName(req);
 
 		mongo.update('template', criteria, req.body, { upsert : true}, function(result) { res.send(result);});
 	});
 	
-	app.get('/goal/:_user/:_type(year\|month\|week\|day\|other)/:_date', function(req,res) {
+	app.get('/goal/:_type(year\|month\|week\|day\|other)/:_date', function(req,res) {
 		console.log("get goal invoked");
 		console.log(req.params);
-		mongo.find('goal', { user : req.params._user, type: req.params._type, date: req.params._date }, {}, 
+		mongo.find('goal', { user : extractUserName(req) , type: req.params._type, date: req.params._date }, {}, 
 			function(list) {
 				res.json(list);
 			}
@@ -125,10 +135,12 @@ router = function(app, server) {
 		//重複チェックが必要（重複チェックの条件はユーザと日付）
 		console.log("goal post invoked");
 		var criteria = {
-				user: req.body.user,
+				user: extractUserName(req), 
 				date: req.body.date
 		};
-		mongo.update('goal', criteria, req.body, { upsert : true}, function(result) { res.send(result);});
+		var data = req.body;
+		data.user = extractUserName(req);
+		mongo.update('goal', criteria, data , { upsert : true}, function(result) { res.send(result);});
 	});
 	
 	app.delete('/goal', function(req, res) {

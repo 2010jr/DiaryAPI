@@ -8,7 +8,6 @@ var TemplateView = require('./components/TemplateView.react');
 
 var props = {};
 props.url = "/diary";
-props.user = "kusahana";
 
 document.getElementById("nav-menu-diary").onclick = function() {
 		React.render(
@@ -28,7 +27,7 @@ document.getElementById("nav-menu-calendar").onclick = function() {
 
 document.getElementById("nav-menu-goal").onclick = function() {
 		React.render(
-						<GoalView {...{user: "kusahana", url:"/goal"}} />
+						<GoalView {...{url:"/goal"}} />
 						, document.getElementById("container-view")
 					);
 		return false;

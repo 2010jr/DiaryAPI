@@ -6,7 +6,6 @@ var d3Util = require('../util');
 var DiaryForm = React.createClass({
 		propTypes: {
 				url: React.PropTypes.string,
-				user: React.PropTypes.string,
 				id: React.PropTypes.string,
 		},
 
@@ -33,7 +32,7 @@ var DiaryForm = React.createClass({
 		},
 
 		getGoalAndUpdate: function(goalType, tdate) {
-				jQuery.get("goal" + "/" + this.props.user + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
+				jQuery.get("goal" + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
 						if(this.hasElement(data)) {
 							this.setState({
 								goals : [data[0].goal1, data[0].goal2, data[0].goal3]
@@ -47,7 +46,7 @@ var DiaryForm = React.createClass({
 		},
 
 		getDiaryAndUpdate: function(goalType, tdate) {
-				jQuery.get("diary" + "/" + this.props.user + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
+				jQuery.get("diary" + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
 						if (this.hasElement(data)) {
 								this.setState({
 										evaluates : data[0].evaluates,
@@ -69,7 +68,6 @@ var DiaryForm = React.createClass({
 
 		handleSubmit : function() {
 			var data = {
-					user : this.props.user,
 					date : d3Util.formatDate(this.state.tdate, "day"),
 					evaluates : [0,1,2].map(function(val) { return React.findDOMNode(this.refs["evaluate_" + val]).value;}.bind(this)),
 					comments : [0,1,2].map(function(val) { return React.findDOMNode(this.refs["comment_" + val]).value;}.bind(this)),
@@ -113,14 +111,14 @@ var DiaryForm = React.createClass({
 								return <div className="panel panel-default">
 										<div className="panel-heading form-inline">
 											<label className="panel-title">{val}</label>
-									   		<select className="form-control" ref={"evaluate_" + ind} value={this.state.evaluates[ind]}>
+									   		<select className="form-control" ref={"evaluate_" + ind} defaultValue={this.state.evaluates[ind]}>
 													{[1,2,3,4,5].map(function(num) {
 															return <option value={num}>{num}</option>;
 													})}
 											</select>
 										</div>
 										<div className="panel-body">
-									   		<textarea className="form-control" rows="3" type="text" ref={"comment_" + ind} value={this.state.comments[ind]} />
+									   		<textarea className="form-control" rows="3" type="text" ref={"comment_" + ind} defaultValue={this.state.comments[ind]} />
 										</div>
 								 	  </div>
 							 }.bind(this))

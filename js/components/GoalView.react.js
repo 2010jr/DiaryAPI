@@ -5,7 +5,6 @@ var d3 = require('d3');
 var GoalView = React.createClass({
 		propTypes: {
 				url: React.PropTypes.string.isRequired,
-				user: React.PropTypes.string.isRequired,
 				goalTypes: React.PropTypes.arrayOf,
 				goalTemplates: React.PropTypes.arrayOf
 		},
@@ -26,7 +25,6 @@ var GoalView = React.createClass({
 
 		handleSubmit: function() {
 			var data = { 
-				user: this.props.user,
 			    type: this.state.goalType,
 				date: d3Util.formatDate(this.state.tdate, this.state.goalType),
 				goal1: React.findDOMNode(this.refs.goal1).value,
@@ -99,7 +97,7 @@ var GoalView = React.createClass({
 		componentDidMount: function() {
 				var refs = this.refs;
 				var props = this.props;
-				d3.json(this.props.url + "/" + this.props.user + "/" + this.state.goalType + "/" + d3Util.formatDate(this.state.tdate, this.state.goalType), function(error, json) {
+				d3.json(this.props.url + "/" + this.state.goalType + "/" + d3Util.formatDate(this.state.tdate, this.state.goalType), function(error, json) {
 						var data = {};
 						if (null != error) {
 								console.log(error);
