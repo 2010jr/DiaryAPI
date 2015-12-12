@@ -4,7 +4,7 @@ var db;
 var mongo_client = require('mongodb').MongoClient
 var assert = require('assert');
 
-var url = 'mongodb://localhost:27017';
+var url = 'mongodb://159.8.128.54:10078';
 
 mongo_client.connect(url, function(err, mongodb) {
  assert.equal(null, err);

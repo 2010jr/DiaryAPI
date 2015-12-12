@@ -97,7 +97,6 @@
 								.attr("height", height)
 								.attr("class", "RdYlGn")
 								.append("g");
-								console.log(svg);
 							
 								var day_group = svg.selectAll("g")
 								.data(function(d) { 
@@ -232,13 +231,15 @@
 						.style("visibility", "hidden")
 						.text("a simple tooltip");
 
-						d3.csv("https://dl.dropboxusercontent.com/u/32460977/data.csv", function(error, csv) {
+						d3.json("http://192.168.33.13:3000/diary/kusahana/2015-08-23", function(error, json) {
 								var data = d3.nest()
-								.key(function(d) {return d.Date;})
-								.map(csv);
+								.key(function(d) {return d.date;})
+								.map(json);
+
+								console.log(data);
 
 								rect.filter(function(d) { return d in data;})
-								.attr("class", function(d) { return "day " + color(data[d][0].Evaluation); })
+								.attr("class", function(d) { return "day " + color(data[d][0].eval1); })
 								.select("title");
 
 								//  Tooltip
@@ -246,7 +247,7 @@
 								rect.on("mouseout", mouseout);
 								function mouseover(d) {
 										tooltip.style("visibility", "visible");
-										var percent_data = (data[d] !== undefined) ? data[d][0].Comments : "NA";
+										var percent_data = (data[d] !== undefined) ? data[d][0].comments : "NA";
 										var purchase_text = d + ": " + percent_data;
 
 										tooltip.transition()        
