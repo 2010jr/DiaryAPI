@@ -19,7 +19,8 @@ var GoalView = React.createClass({
 		getInitialState: function() {
 				return {
 						tdate: new Date(),
-						goalType: "month"
+						goalType: "month",
+						alerts: []
 				}
 		},
 
@@ -37,11 +38,17 @@ var GoalView = React.createClass({
 				.post(JSON.stringify(data), function(error, json) {
 						if (null != error) {
 								console.log(error);
+								this.setState({
+										alerts: ["Fail to submit"]
+								});
 								return;
 						}
 						console.log(json);
+						this.setState({
+								alerts: ["Succeed to submit"]
+						});
 						return;
-				});
+				}.bind(this));
 		},
 
 		handleReset: function() {
@@ -50,19 +57,25 @@ var GoalView = React.createClass({
 		
 		handleGoalTypeChange: function(event) {
 			this.setState({
-					goalType: event.target.value
+					goalType: event.target.value,
+					alerts: []
 			});
 		},
 
 		handleDateChange: function(event) {
 			var tdate = d3Util.parseToDate(event.target.value, this.state.goalType);
 			this.setState({
-					tdate: tdate
+					tdate: tdate,
+					alerts: []
 			});
 		},
 
 		render: function() {
 				return  <div> 
+							{this.state.alerts.map(function(val) {
+								return <div className="alert alert-success" role="alert">{val}</div>;
+							 })
+							}
 						<div className="form-inline">
 						<div className="form-group">
 							<input type={this.state.goalType === "other" ? "day" : this.state.goalType} className="form-control" value={d3Util.formatDate(this.state.tdate, this.state.goalType)} onChange={this.handleDateChange}></input>

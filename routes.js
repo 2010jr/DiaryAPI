@@ -2,9 +2,9 @@
 var router;
 
 var mongo = require('./mongo');
-var ldap = require('./ldap_client');
 var body_parser = require('body-parser');
 var express = require('express');
+var account = require('./account.json');
 
 function extractUserName(req) {
 	if (!req.headers.authorization) {
@@ -19,7 +19,6 @@ function basicAuthenticate(req, res, next) {
 	var auth,
 	    login;
 	
-	console.log('req:' + req);
 	if (!req.headers.authorization) {
 		return authenticate(res);
 	}
@@ -29,13 +28,11 @@ function basicAuthenticate(req, res, next) {
 	auth = (new Buffer(auth, 'base64')).toString('utf-8');
 	login = auth.split(':');
 
-	ldap.authenticate(login[0], login[1], function(err) {
-			if (!err) {
-					next();
-			} else {
-					authenticate(res);
-			}
-	});
+	if (account[login[0]] && account[login[0]] === login[1]) {
+			next();
+	} else {
+			authenticate(res);
+	}
 }
 		
 function authenticate(res) {
@@ -58,7 +55,7 @@ router = function(app, server) {
 		next();
 	});
 	app.get('/', function(req, res) {
-		res.redirect('/d3_calendar2.html');
+		res.redirect('/index.html');
 	});
 	app.get('/diary?', function(req, res) {
 		var criteria = { user : extractUserName(req)};

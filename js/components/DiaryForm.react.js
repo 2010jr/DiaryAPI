@@ -5,8 +5,7 @@ var d3Util = require('../util');
 
 var DiaryForm = React.createClass({
 		propTypes: {
-				url: React.PropTypes.string,
-				id: React.PropTypes.string,
+				url: React.PropTypes.string
 		},
 
 		getDefaultProps: function() {
@@ -15,7 +14,7 @@ var DiaryForm = React.createClass({
 
 		getInitialState: function() {
 				return {
-						id: 'dairy_form-1',
+					 	alerts : [],
 						goals: [],
 						evaluates: [], 
 						comments: [],
@@ -35,11 +34,11 @@ var DiaryForm = React.createClass({
 				jQuery.get("goal" + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
 						if(this.hasElement(data)) {
 							this.setState({
-								goals : [data[0].goal1, data[0].goal2, data[0].goal3]
+								goals : [data[0].goal1, data[0].goal2, data[0].goal3],
 							});
 						} else {
 							this.setState({
-								goals : []
+								goals : [],
 							});
 						}
 				}.bind(this));
@@ -50,12 +49,12 @@ var DiaryForm = React.createClass({
 						if (this.hasElement(data)) {
 								this.setState({
 										evaluates : data[0].evaluates,
-										comments : data[0].comments
+										comments : data[0].comments,
 								});
 						} else {
 								this.setState({
 										evaluates : [1, 1, 1],
-										comments: ["", "", ""]
+										comments: ["", "", ""],
 								});
 						}
 				}.bind(this));
@@ -78,11 +77,18 @@ var DiaryForm = React.createClass({
 					.post(JSON.stringify(data), function(error, json) {
 							if (null != error) {
 									console.log(error);
+									this.setState({
+											alerts : ["Fail to submit"]
+									});
 									return;
 							}
 							console.log(json);
+							
+							this.setState({
+									alerts : ["Succeed to submit"]
+							});
 							return;
-					});	
+					}.bind(this));	
 		},
 
 		handleReset : function() {
@@ -92,7 +98,8 @@ var DiaryForm = React.createClass({
 		handleDateChange: function(event) {
 			var tdate = d3Util.parseToDate(event.target.value, "day");
 			this.setState({
-					tdate: tdate
+					tdate: tdate,
+					alerts: []
 			});
 
 			this.getGoalAndUpdate("month", tdate);
@@ -102,6 +109,10 @@ var DiaryForm = React.createClass({
 		render: function() {
 				// Set variable to access in each map method.(Do not use this keyword in map method)
 				return <div> 
+							{this.state.alerts.map(function(val) {
+								return <div className="alert alert-success" role="alert">{val}</div>;
+							 })
+							}
 							<div className="input-group">
 								<span className="input-group-addon">Date</span>
 								<input id="diary_form_tdate" className="form-control" name="date" type="date" value={d3Util.formatDate(this.state.tdate, "day")} onChange={this.handleDateChange} />
