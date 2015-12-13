@@ -3,8 +3,16 @@
 var db;
 var mongo_client = require('mongodb').MongoClient
 var assert = require('assert');
+var mongoEnv = process.env.VCAP_SERVICES;
+var port = process.env.PORT || 27017;
 
 var url = 'mongodb://localhost:27017';
+if (mongoEnv) {
+		var env = JSON.parse(mongoEnv);
+		var mongoInfo = env['mongodb-2.4'][0]['credentials'];
+		url = mongoInfo.url;
+}		
+				
 
 mongo_client.connect(url, function(err, mongodb) {
  assert.equal(null, err);
