@@ -18,6 +18,7 @@ var DiaryForm = React.createClass({
 						goals: [],
 						evaluates: [], 
 						comments: [],
+						freeComments: [''],
 						tdate: new Date()
 				};
 		},
@@ -38,7 +39,7 @@ var DiaryForm = React.createClass({
 							});
 						} else {
 							this.setState({
-								goals : [],
+								goals : []
 							});
 						}
 				}.bind(this));
@@ -50,11 +51,13 @@ var DiaryForm = React.createClass({
 								this.setState({
 										evaluates : data[0].evaluates,
 										comments : data[0].comments,
+										freeComments: data[0].freeComments,
 								});
 						} else {
 								this.setState({
-										evaluates : [1, 1, 1],
-										comments: ["", "", ""],
+										evaluates : [1,1,1],
+										comments: ['','',''],
+										freeComments: ['']
 								});
 						}
 				}.bind(this));
@@ -70,7 +73,11 @@ var DiaryForm = React.createClass({
 					date : d3Util.formatDate(this.state.tdate, "day"),
 					evaluates : [0,1,2].map(function(val) { return React.findDOMNode(this.refs["evaluate_" + val]).value;}.bind(this)),
 					comments : [0,1,2].map(function(val) { return React.findDOMNode(this.refs["comment_" + val]).value;}.bind(this)),
+					freeComments : [React.findDOMNode(this.refs["free_comment"]).value]
+
 			};	
+
+			console.log(data);
 			
 			d3.json(this.props.url)
 					.header("Content-Type", "application/json")
@@ -123,7 +130,7 @@ var DiaryForm = React.createClass({
 										<div className="panel-heading form-inline">
 											<label className="panel-title">{val}</label>
 									   		<select className="form-control" ref={"evaluate_" + ind} defaultValue={this.state.evaluates[ind]}>
-													{[1,2,3,4,5].map(function(num) {
+													{['',1,2,3,4,5].map(function(num) {
 															return <option value={num}>{num}</option>;
 													})}
 											</select>
@@ -133,6 +140,17 @@ var DiaryForm = React.createClass({
 										</div>
 								 	  </div>
 							 }.bind(this))
+							}
+							{this.state.freeComments.map(function(val) {
+								return <div className="panel panel-default">
+										<div className="panel-heading form-inline">
+											<label className="panel-title">Free Comments</label>
+										</div>
+										<div className="panel-body">
+									   		<textarea className="form-control" rows="5" type="text" ref="free_comment" defaultValue={val} />
+										</div>
+								 	  </div>
+						   	})
 							}
 							<button className="btn btn-primary" onClick={this.handleSubmit}>Submit</button>
 							<button className="btn btn-default" onClick={this.handleReset}>Cancel</button>	
