@@ -23,6 +23,19 @@ var DiaryForm = React.createClass({
 				};
 		},
 
+		handleChangeForm: function(name,e) {
+				var change = {};
+				if (name && this.state[name]) {
+						change[name] = this.state[name];
+				}
+				if (e.target.name) {
+						change[name][e.target.name] = e.target.value;
+				} else {
+						change[name] = e.target.value;
+				}
+				this.setState(change);
+		},
+
 		hasElement : function(array) {
 				if (Array.isArray(array) && array.length > 0) {
 						return true;
@@ -71,10 +84,9 @@ var DiaryForm = React.createClass({
 		handleSubmit : function() {
 			var data = {
 					date : d3Util.formatDate(this.state.tdate, "day"),
-					evaluates : [0,1,2].map(function(val) { return React.findDOMNode(this.refs["evaluate_" + val]).value;}.bind(this)),
-					comments : [0,1,2].map(function(val) { return React.findDOMNode(this.refs["comment_" + val]).value;}.bind(this)),
-					freeComments : [React.findDOMNode(this.refs["free_comment"]).value]
-
+					evaluates : this.state.evaluates, 
+					comments : this.state.comments, 
+					freeComments : this.state.freeComments
 			};	
 
 			console.log(data);
@@ -129,28 +141,28 @@ var DiaryForm = React.createClass({
 								return <div className="panel panel-default">
 										<div className="panel-heading form-inline">
 											<label className="panel-title">{val}</label>
-									   		<select className="form-control" ref={"evaluate_" + ind} defaultValue={this.state.evaluates[ind]}>
+									   		<select className="form-control" value={this.state.evaluates[ind]} name={ind} onChange={this.handleChangeForm.bind(this, "evaluates")}>
 													{['',1,2,3,4,5].map(function(num) {
 															return <option value={num}>{num}</option>;
 													})}
 											</select>
 										</div>
 										<div className="panel-body">
-									   		<textarea className="form-control" rows="3" type="text" ref={"comment_" + ind} defaultValue={this.state.comments[ind]} />
+									   		<textarea className="form-control" rows="3" type="text" name={ind} value={this.state.comments[ind]} onChange={this.handleChangeForm.bind(this, "comments")}/>
 										</div>
 								 	  </div>
 							 }.bind(this))
 							}
-							{this.state.freeComments.map(function(val) {
+							{this.state.freeComments.map(function(val,ind) {
 								return <div className="panel panel-default">
 										<div className="panel-heading form-inline">
 											<label className="panel-title">Free Comments</label>
 										</div>
 										<div className="panel-body">
-									   		<textarea className="form-control" rows="5" type="text" ref="free_comment" defaultValue={val} />
+									   		<textarea className="form-control" rows="5" type="text" name={ind} value={val} onChange={this.handleChangeForm.bind(this, "freeComments")} />
 										</div>
 								 	  </div>
-						   	})
+						   	}.bind(this))
 							}
 							<button className="btn btn-primary" onClick={this.handleSubmit}>Submit</button>
 							<button className="btn btn-default" onClick={this.handleReset}>Cancel</button>	
