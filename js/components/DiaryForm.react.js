@@ -62,9 +62,9 @@ var DiaryForm = React.createClass({
 				jQuery.get("diary" + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
 						if (this.hasElement(data)) {
 								this.setState({
-										evaluates : data[0].evaluates,
-										comments : data[0].comments,
-										freeComments: data[0].freeComments,
+										evaluates : data[0].evaluates ? data[0].evaluates : [],
+										comments : data[0].comments ? data[0].comments : [],
+										freeComments: data[0].freeComments ? data[0].freeComments : []
 								});
 						} else {
 								this.setState({
