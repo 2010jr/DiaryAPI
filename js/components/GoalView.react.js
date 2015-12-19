@@ -79,7 +79,7 @@ var GoalView = React.createClass({
 						<div className="form-inline">
 						<div className="form-group">
 							<input type={this.state.goalType === "other" ? "day" : this.state.goalType} className="form-control" value={d3Util.formatDate(this.state.tdate, this.state.goalType)} onChange={this.handleDateChange}></input>
-							<label>Goal Type</label>
+							<label>Habit Type</label>
 							<select className="form-control" value={this.state.goalType} onChange={this.handleGoalTypeChange}>
 							{this.props.goalTypes.map(function(val) {
 										return <option value={val}>{val}</option>;
@@ -89,11 +89,11 @@ var GoalView = React.createClass({
 						</div>
 					 </div>
 					 <div className="form-group">
-						<label>Goal1</label>
+						<label>Habit1</label>
 						<input type="text" className="form-control" ref="goal1"></input>
-						<label>Goal2</label>
+						<label>Habit2</label>
 						<input type="text" className="form-control" ref="goal2"></input>
-						<label>Goal3</label>
+						<label>Habit3</label>
 						<input type="text" className="form-control" ref="goal3"></input>
 					 </div>
 					 <div className="form-group">
