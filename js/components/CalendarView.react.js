@@ -23,6 +23,7 @@ var CalendarView = React.createClass({
 						cellsize: 50,
 						goals: ["Goal1", "Goal2", "Goal3"],
 						activeGoalInd : 0,
+						progressRates: [0,0,0],
 				};
 		},
 
@@ -51,16 +52,12 @@ var CalendarView = React.createClass({
 						<div className="form-tabs">
 						<div className="form-group">
 						<input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleDateChange}></input>
-						<ul className="nav nav-pills nav-stacked">
+						<div className="list-group">
 						{this.state.goals.map(function(val, ind) {
-																		 if (this.state.activeGoalInd === ind) {
-																				 return <li role="presentation" className="active" ><a ref="#" onClick={this.handleChangeGoal.bind(null, ind)}>{val}</a></li>;
-																		 } else {
-																				 return <li role="presentation"><a ref="#" onClick={this.handleChangeGoal.bind(null, ind)}>{val}</a></li>;
-																		 }
-																 }.bind(this))
+							 return <a ref="#" className={ind === this.state.activeGoalInd ? "list-group-item active" : "list-group-item"} onClick={this.handleChangeGoal.bind(null, ind)}><span className="badge">{this.state.progressRates[ind]}</span>{val}</a>;
+						 }.bind(this))
 						}
-				</ul>
+						</div>
 						</div>
 						</div>
 						<div id={this.props.rootSelector}></div>
