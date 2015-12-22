@@ -1,66 +1,71 @@
 var React = require('react');
+var ReactDOM = require('react-dom');
 var ReactPropTypes = React.PropTypes;
 var d3Util = require('../util');
 var d3 = require('d3');
-var DiaryForm = require('./DiaryForm.react');
+var Calendar = require('./Calendar.react.js');
 
 var CalendarView = React.createClass({
 		propTypes: { 
 				url: React.PropTypes.string.isRequired,
-				rootSelector: React.PropTypes.string.isRequired
 		},
 
 		getDefaultProps: function() {
 				return {
-						rootSelector: "CalendarView" 
 				}
 		},
 
 		getInitialState: function() {
 				return {
 						tdate: new Date(),
-						valtype: "",
-						cellsize: 50,
 						goals: ["Goal1", "Goal2", "Goal3"],
 						activeGoalInd : 0,
 						progressRates: [0,0,0],
 				};
 		},
 
-		handleDateChange: function(event) {
+		handleChangeDate : function(event) {
+				var changedDate = d3Util.month_format.parse(event.target.value);
+				console.log("changedDate : " + changedDate);
 				this.setState({
-						tdate: d3Util.month_format.parse(event.target.value)
+						tdate: changedDate, 
 				});
+				var result = ReactDOM.unmountComponentAtNode(document.getElementById("calendar-component"));
+				var transferProps = {
+						tdate : changedDate,
+					    dataSet : this.state.dataSet,
+						activeIndex : this.state.activeGoalInd,
+				};
+			    ReactDOM.render(<Calendar {...transferProps} />, document.getElementById("calendar-component"));
 		},
 
-		handleRemove: function(event) {
-				console.log("test");
-		},
-
-		handleRemoveAll: function(event) {
-				console.log("test");
-		},
-
-		handleChangeGoal: function(ind) {
-				this.setState({
-						activeGoalInd: ind 
-				});
+		handleChangeGoal : function(ind) {
+			this.setState({
+					activeGoalInd : ind 
+			});	 
+			var result = ReactDOM.unmountComponentAtNode(document.getElementById("calendar-component"));
+			var transferProps = {
+						tdate : this.state.tdate,
+					    dataSet : this.state.dataSet,
+						activeIndex : ind, 
+			};
+		    ReactDOM.render(<Calendar {...transferProps} />, document.getElementById("calendar-component"));
 		},
 
 		render: function() {
 				return <div>
 						<div className="form-tabs">
-						<div className="form-group">
-						<input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleDateChange}></input>
-						<div className="list-group">
-						{this.state.goals.map(function(val, ind) {
-							 return <a ref="#" className={ind === this.state.activeGoalInd ? "list-group-item active" : "list-group-item"} onClick={this.handleChangeGoal.bind(null, ind)}><span className="badge">{this.state.progressRates[ind]}</span>{val}</a>;
-						 }.bind(this))
-						}
-						</div>
-						</div>
-						</div>
-						<div id={this.props.rootSelector}></div>
+						 <div className="form-group">
+						  <input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleChangeDate}></input>
+						  <div className="list-group">
+						   {this.state.goals.map(function(val, ind) {
+						   	 return <a ref="#" className={ind === this.state.activeGoalInd ? "list-group-item active" : "list-group-item"} onClick={this.handleChangeGoal.bind(this, ind)}><span className="badge">{this.state.progressRates[ind]}</span>{val}</a>;
+						    }.bind(this))
+						   }
+						  </div>
+						 </div>
+					    </div>
+						<div id="calendar-component"></div>
 						</div>;
 		},
 
@@ -72,89 +77,42 @@ var CalendarView = React.createClass({
 						}
 						if (json.length > 0) {
 								this.setState({
-										goals: [json[0].goal1, json[0].goal2, json[0].goal3]
+										goals: [json[0].goal1, json[0].goal2, json[0].goal3],
 								});
 						}
 				}.bind(this));
 		},
 
+		getDiaryAndUpdate : function(tDate) {
+				var sDate = d3Util.date_format(d3Util.nextMonthFirstDate(tDate));
+				var eDate = d3Util.date_format(d3Util.thisMonthFirstDate(tDate));
+				var reqUrl = this.props.url + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
 
-		componentWillMount: function() {
-				this.getGoalAndUpdate("month", this.state.tdate);
+				d3.json(reqUrl, function(error, json) { 
+					if ( null != error) {
+							console.log(error);
+							return;
+					}	
+					this.setState({
+							dataSet : json,
+					});
+					var result = ReactDOM.unmountComponentAtNode(document.getElementById("calendar-component"));
+					var transferProps = {
+							tdate : this.state.tdate,
+							dataSet : json,
+							activeIndex : this.state.activeIndex, 
+					};
+		    		ReactDOM.render(<Calendar {...transferProps} />, document.getElementById("calendar-component"));
+				}.bind(this));
 		},
-
+		
 		componentDidMount: function() {
-				var thisProps = this.props;
-				var thisState = this.state;
-
-				var color = d3.scale.quantize()
-						.domain([1, 5])
-						.range(d3.range(9).map(function(d) { return "q" + d + "-9"; }));
-
-				var formatText = function(data) {
-						return "<p>" + data.date + "</p>" + "<p>Evaluate : " + data.evaluates[thisState.activeGoalInd]+ "</p>" + "<p>Comment : " + data.comments[thisState.activeGoalInd] + "</p>";
-				};
-
-				var d3CalendarMonthRect = function(selector,sDate, eDate, cellsize) {
-						var svg = d3Util.buildCalendarSvg(selector,sDate, eDate, cellsize);
-						var weekTitle = d3Util.buildWeekTitle(svg, cellsize);
-						var dayGroup = d3Util.buildDayGroup(svg);
-						var rect = d3Util.buildRect(dayGroup, cellsize); 
-						var daytext = d3Util.buildDayText(dayGroup, cellsize);
-						var tooltip = d3Util.buildToolTip(selector, "tooltip");
-
-						var reqUrl = thisProps.url + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
-						var	dataSet = d3.json(reqUrl, function(error, json) { 
-								if ( null != error) {
-										console.log(error);
-										return;
-								}	
-								console.log(json);
-								var data = d3.nest()
-										.key(function(d) { return d.date;})
-										.map(json);
-
-								rect.filter(function(d) { return d in data;})
-										.attr("class", function(d) { return "day-off " + color(data[d][0].evaluates[thisState.activeGoalInd]);})
-										.select("title");
-
-								rect.on("mouseover", function(d) {
-										var className = d3.select(this).attr("class");
-										d3.select(this).attr("class",className.replace("day-off", "day-on"));
-
-										if (data[d]) {
-												tooltip.style("visibility", "visible");
-												tooltip.transition()
-														.duration(100)
-														.style("opacity", .9);
-												tooltip.html(formatText(data[d][0]))
-														.style("left", (d3.event.pageX) + 30 + "px")
-														.style("top", (d3.event.pageY) + "px");
-										}
-								});
-
-								rect.on("mouseout", function(d) {
-										var className = d3.select(this).attr("class");
-										d3.select(this).attr("class",className.replace("day-on", "day-off"));
-
-										tooltip.transition()
-												.duration(100)
-												.style("opacity", 0);
-
-										$("tooltip").empty();
-								});
-						});
-				};
 				var sDate = d3Util.date_format(d3Util.nextMonthFirstDate(this.state.tdate));
 				var eDate = d3Util.date_format(d3Util.thisMonthFirstDate(this.state.tdate));
-				d3CalendarMonthRect("#" + this.props.rootSelector,sDate, eDate,this.state.cellsize);
+				this.getGoalAndUpdate("month", this.state.tdate);
+				this.getDiaryAndUpdate(this.state.tdate);
+			    ReactDOM.render(<Calendar tdate={this.state.tdate} dataSet={this.state.dataSet} activeIndex={this.state.activeGoalInd} />, document.getElementById("calendar-component"));
 		},
-
-		componentDidUpdate: function() {
-				d3.select("#" + this.props.rootSelector).selectAll("svg").selectAll("g").remove();
-				d3.select("#" + this.props.rootSelector).selectAll("svg").remove();
-				this.componentDidMount();
-		}
 });
 
 module.exports = CalendarView;
