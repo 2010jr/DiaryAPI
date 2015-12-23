@@ -26,10 +26,11 @@ var CalendarView = React.createClass({
 
 		handleChangeDate : function(event) {
 				var changedDate = d3Util.month_format.parse(event.target.value);
-				console.log("changedDate : " + changedDate);
 				this.setState({
 						tdate: changedDate, 
 				});
+				this.getDiaryAndUpdate(changedDate);
+
 				var result = ReactDOM.unmountComponentAtNode(document.getElementById("calendar-component"));
 				var transferProps = {
 						tdate : changedDate,
@@ -59,7 +60,7 @@ var CalendarView = React.createClass({
 						  <input className="form-control" type="month" value={d3Util.month_format(this.state.tdate)} onChange={this.handleChangeDate}></input>
 						  <div className="list-group">
 						   {this.state.goals.map(function(val, ind) {
-						   	 return <a ref="#" className={ind === this.state.activeGoalInd ? "list-group-item active" : "list-group-item"} onClick={this.handleChangeGoal.bind(this, ind)}><span className="badge">{this.state.progressRates[ind]}</span>{val}</a>;
+						   	 return <a ref="#" className={ind === this.state.activeGoalInd ? "list-group-item active" : "list-group-item"} onClick={this.handleChangeGoal.bind(this, ind)}><span className="badge">{this.state.progressRates[ind] + "%"}</span>{val}</a>;
 						    }.bind(this))
 						   }
 						  </div>
@@ -84,17 +85,27 @@ var CalendarView = React.createClass({
 		},
 
 		getDiaryAndUpdate : function(tDate) {
-				var sDate = d3Util.date_format(d3Util.nextMonthFirstDate(tDate));
-				var eDate = d3Util.date_format(d3Util.thisMonthFirstDate(tDate));
-				var reqUrl = this.props.url + "?" + "date[$gte]=" + sDate + "&date[$lt]=" + eDate; 
+				var sDate = d3Util.nextMonthFirstDate(tDate),
+					eDate = d3Util.thisMonthFirstDate(tDate);
+
+				var reqUrl = this.props.url + "?" + "date[$gte]=" + d3Util.date_format(sDate) + "&date[$lt]=" + d3Util.date_format(eDate),
+					
+					days = (365 + d3.time.dayOfYear(eDate) - d3.time.dayOfYear(sDate)) % 365;
 
 				d3.json(reqUrl, function(error, json) { 
 					if ( null != error) {
 							console.log(error);
 							return;
 					}	
+					var progressRates = [0,1,2].map(function(ind) { 
+							var totalPoint = d3.sum(json, function(val) {
+									return val.evaluates[ind];
+						    });
+							return Math.round(100 * totalPoint / (days * 5));
+					});
 					this.setState({
 							dataSet : json,
+							progressRates : progressRates
 					});
 					var result = ReactDOM.unmountComponentAtNode(document.getElementById("calendar-component"));
 					var transferProps = {
