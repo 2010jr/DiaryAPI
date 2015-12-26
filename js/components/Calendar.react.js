@@ -43,7 +43,8 @@ var Calendar = React.createClass({
 			if( !dataSet || !Array.isArray(dataSet) || dataSet.length === 0) {
 					return;
 			}
-			var that = this, 
+			var today = d3Util.date_format(new Date()),
+				that = this, 
 			    data = d3.nest()
 						 .key(function(d) { return d.date;})
 						 .map(dataSet),
@@ -53,9 +54,13 @@ var Calendar = React.createClass({
 						.domain([1, 5])
 						.range(d3.range(9).map(function(d) { return "q" + d + "-9"; }));
 
+
 			rect.filter(function(d) { return d in data;})
 					.attr("class", function(d) { return "day-off " + color(data[d][0].evaluates[activeIndex]);})
 					.select("title");
+
+			rect.filter(function(d) { return (!( d in data) && d < today);})
+					.attr("class", "day-past");
 
 			rect.on("mouseover", function(d) {
 					var className = d3.select(this).attr("class");

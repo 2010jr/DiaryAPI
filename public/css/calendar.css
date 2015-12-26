@@ -8,6 +8,11 @@
 		stroke: #111111;
 }
 
+.day-past {
+		fill: #dbdbdb;
+		stroke: #EEEEEE;
+}
+
 .tooltip {
 		background-color: #FFFFFF;
 		border: 2px solid #CCCCCC;
