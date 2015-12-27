@@ -40,6 +40,30 @@ var d3Util = function() {
 				},
 				nextMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1, 1)},
 				thisMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1 + 1, 1)},
+				offsetByFormatType: function(date, formatType, offset) {
+						var year = d3Util.year(date),
+							month = parseInt(d3Util.month(date)) - 1,
+							day = d3Util.day_of_month(date);
+
+						switch (formatType)  {
+								case "year" :
+										return new Date(year + offset, month, day);
+								case "month" : 
+										return new Date(year, month + offset, day); 
+								case "day" : 
+										return new Date(year, month , day + offset);
+								default :
+										return date;
+						}
+				},
+
+				getHigherGoalType : function(goalType) {
+						var higherGoalTypes = ["year", "month", "week", "day"].filter(function(val, ind, array) {
+								return goalType === array[ind + 1];
+						});
+						return higherGoalTypes.length > 0 ? higherGoalTypes[0] : null;
+				},
+
 				buildCalendarSvg: function(selector, sDate, eDate, cellsize) {
 						var width = cellsize * 7; 
 						var height = cellsize * (6 + 1); //including month title

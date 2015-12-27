@@ -4,7 +4,7 @@ var ReactDOM = require('react-dom');
 window.React = require('react');
 var DiaryForm = require('./components/DiaryForm.react');
 var CalendarView = require('./components/CalendarView.react');
-var GoalView = require('./components/GoalView.react');
+var GoalFormView = require('./components/GoalForm.react');
 var TemplateView = require('./components/TemplateView.react');
 
 var props = {};
@@ -28,7 +28,7 @@ document.getElementById("nav-menu-calendar").onclick = function() {
 
 document.getElementById("nav-menu-goal").onclick = function() {
 		ReactDOM.render(
-						<GoalView {...{url:"/goal"}} />
+						<GoalFormView {...{url:"/goal"}} />
 						, document.getElementById("container-view")
 					);
 		return false;
