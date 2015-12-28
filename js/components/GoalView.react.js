@@ -43,17 +43,20 @@ var GoalView = React.createClass({
 				var refs = this.refs;
 				var props = this.props;
 				d3.json("/goal/" + this.props.goalType + "/" + d3Util.formatDate(this.props.tdate, this.props.goalType), function(error, json) {
-						var data = {};
+						var goals = [];
 						if (null != error) {
 								console.log(error);
 								return;
 						}
 						if (json.length > 0) {
-							data = json[0];	
+							if (json.goals) {
+								goals = json[0].goals;
+							} else {
+								goals = [json[0].goal1, json[0].goal2, json[0].goal3];
+							}
 						}
-						console.log(data.goal1);
 						this.setState({
-								goals: [data.goal1, data.goal2, data.goal3]
+								goals: goals,
 						});
 				}.bind(this));	   
 		},
