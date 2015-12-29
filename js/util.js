@@ -10,7 +10,7 @@ var d3Util = function() {
 				year : d3.time.format("%Y"),
 				date_format : d3.time.format("%Y-%m-%d"),
 				month_format: d3.time.format("%Y-%m"),
-				week_format: d3.time.format("%Y-%m-%U"),
+				week_format: d3.time.format("%Y-W%U"),
 				formatDate: function(date, formatType) { 
 						switch (formatType) {
 								case "year": 
@@ -18,12 +18,7 @@ var d3Util = function() {
 								case "month":
 										return d3Util.month_format(date);
 								case "week":
-										var year = d3Util.year(date),
-											month = d3Util.month(date),
-											weekAbs = d3Util.week(date);
-										//上で求めたweekAbsは年単位での週の番号なので、月単位に変換する必要がある
-										var week = parseInt(weekAbs) - parseInt(d3Util.week(new Date(year, month, 1)));
-										return year + "-" + month + "-" + week;
+										return d3Util.week_format(date); 
 								default:
 										return d3Util.date_format(date);
 						}
@@ -41,15 +36,17 @@ var d3Util = function() {
 				nextMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1, 1)},
 				thisMonthFirstDate: function(date) { return new Date(d3Util.year(date), parseInt(d3Util.month(date)) - 1 + 1, 1)},
 				offsetByFormatType: function(date, formatType, offset) {
-						var year = d3Util.year(date),
+						var year = parseInt(d3Util.year(date)),
 							month = parseInt(d3Util.month(date)) - 1,
-							day = d3Util.day_of_month(date);
+							day = parseInt(d3Util.day_of_month(date));
 
 						switch (formatType)  {
 								case "year" :
 										return new Date(year + offset, month, day);
 								case "month" : 
 										return new Date(year, month + offset, day); 
+								case "week" : 
+										return new Date(year , month, day + offset * 7);
 								case "day" : 
 										return new Date(year, month , day + offset);
 								default :

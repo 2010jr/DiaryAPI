@@ -54,24 +54,49 @@ var GoalFormView = React.createClass({
 		handleReset: function() {
 
 		},
+
+		updateChildComponent: function(goalType, tdate) {
+			var previousDate = d3Util.offsetByFormatType(tdate, goalType, -1),
+				higherGoalType = d3Util.getHigherGoalType(goalType);
+			
+			ReactDOM.unmountComponentAtNode(document.getElementById("previous-goal"));
+			ReactDOM.unmountComponentAtNode(document.getElementById("higher-goal"));
+			if (previousDate) {
+					var previousGoalProps = {
+							tdate : previousDate,
+							goalType : goalType,
+							title : "Previous Goal"
+					};
+					ReactDOM.render( <GoalView {...previousGoalProps} />, document.getElementById("previous-goal"));
+			}
+
+			if (higherGoalType) {
+					var higherGoalProps = {
+							tdate : tdate,
+							goalType : higherGoalType,
+							title : "Higher Goal",
+					};
+					ReactDOM.render( <GoalView {...higherGoalProps} />, document.getElementById("higher-goal"));
+			}
+		},
 		
 		handleGoalTypeChange: function(event) {
-			console.log("handleGoalTypeChange invoked");
 			this.getGoalAndUpdate(event.target.value, this.state.tdate);
 			this.setState({
 					goalType: event.target.value,
 					alerts: []
 			});
+			this.updateChildComponent(event.target.value, this.state.tdate);
 		},
 
 		handleDateChange: function(event) {
-			console.log("handleDateChange invoked");
 			var tdate = d3Util.parseToDate(event.target.value, this.state.goalType);
 			this.getGoalAndUpdate(this.state.goalType, tdate);
 			this.setState({
 					tdate: tdate,
 					alerts: []
 			});
+			this.updateChildComponent(this.state.goalType, tdate);
 		},
 
 		handleGoalChange: function(event, ind) {
@@ -146,14 +171,7 @@ var GoalFormView = React.createClass({
 				var previousDate = d3Util.offsetByFormatType(this.state.tdate, this.state.goalType, -1),
 					higherGoalType = d3Util.getHigherGoalType(this.state.goalType);
 				this.getGoalAndUpdate(this.state.goalType, this.state.tdate);
-
-				ReactDOM.render(
-						<GoalView tdate={previousDate} goalType={this.state.goalType} title={"Previous Goal"} />
-						, document.getElementById("previous-goal"));
-
-				ReactDOM.render(
-						<GoalView tdate={this.state.tdate} goalType={higherGoalType} title={"Higher Goal"} />
-						, document.getElementById("higher-goal"));
+				this.updateChildComponent(this.state.goalType, this.state.tdate);
 		},
 });
 

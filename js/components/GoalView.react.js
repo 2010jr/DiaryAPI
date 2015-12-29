@@ -49,7 +49,7 @@ var GoalView = React.createClass({
 								return;
 						}
 						if (json.length > 0) {
-							if (json.goals) {
+							if (json[0].goals) {
 								goals = json[0].goals;
 							} else {
 								goals = [json[0].goal1, json[0].goal2, json[0].goal3];

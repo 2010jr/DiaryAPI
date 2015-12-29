@@ -72,15 +72,21 @@ var CalendarView = React.createClass({
 
 		getGoalAndUpdate: function(goalType, tdate) {
 				d3.json("goal" + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType),function(error, json) {
+						var goals = [];
 						if (null != error) {
 								console.log(error);
 								return;
 						}
 						if (json.length > 0) {
-								this.setState({
-										goals: [json[0].goal1, json[0].goal2, json[0].goal3],
-								});
+								if (json[0].goals) {
+										goals = json[0].goals;
+								} else {
+										goals = [json[0].goal1, json[0].goal2, json[0].goal3];
+								}
 						}
+						this.setState({
+									goals: goals,
+						});
 				}.bind(this));
 		},
 
