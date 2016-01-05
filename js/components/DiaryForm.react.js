@@ -47,9 +47,15 @@ var DiaryForm = React.createClass({
 		getGoalAndUpdate: function(goalType, tdate) {
 				jQuery.get("goal" + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
 						if(this.hasElement(data)) {
-							this.setState({
-								goals : [data[0].goal1, data[0].goal2, data[0].goal3],
-							});
+							if(data[0].goals) {
+								this.setState({
+									goals : data[0].goals,
+								});
+							} else {
+								this.setState({
+									goals : [data[0].goal1, data[0].goal2, data[0].goal3],
+								});
+							}
 						} else {
 							this.setState({
 								goals : []
