@@ -128,20 +128,60 @@ router = function(app, server) {
 		);
 	});
 
+	app.get('/goal?', function(req,res) {
+		var criteria = { user : extractUserName(req)};
+		for( var props in req.query) {
+			if (req.query.hasOwnProperty(props)) {
+				console.log(req.query[props]);
+				criteria[props] = req.query[props];
+			}
+		}
+		console.log("criteria : " + criteria);
+		mongo.find('goal', criteria, {}, function(list) { res.json(list);});
+	});
+
+	app.get('/goal/:_type(year\|month\|week\|day\|other)?', function(req,res) {
+		console.log("get goal invoked");
+		var criteria = { user : extractUserName(req), type: req.params._type };
+		for( var props in req.query) {
+			if (req.query.hasOwnProperty(props)) {
+				console.log(req.query[props]);
+				criteria[props] = req.query[props];
+			}
+		}
+		mongo.find('goal', criteria , {}, 
+			function(list) {
+				res.json(list);
+			}
+		);
+	});
+
 	app.post('/goal', function(req, res) {
-		//重複チェックが必要（重複チェックの条件はユーザと日付）
 		console.log("goal post invoked");
-		var criteria = {
-				user: extractUserName(req), 
-				date: req.body.date
-		};
-		var data = req.body;
-		data.user = extractUserName(req);
-		mongo.update('goal', criteria, data , { upsert : true}, function(result) { res.send(result);});
+		if (Array.isArray(req.body)) {
+			    var	user = extractUserName(req);
+				var ids = req.body.map(function(val) {return val._id;});
+				var dataSet = req.body.map(function(val) { val.user = user; return val});
+
+				mongo.deleteMany('goal', { _id : { $in : ids}}, function(result) {
+						mongo.insert('goal', dataSet, {}, function(result) {
+								res.send(result);
+						});
+				});
+		} else {
+				var criteria = {
+						user: extractUserName(req), 
+						date: req.body.date
+				};
+				var data = req.body;
+				data.user = extractUserName(req);
+				mongo.update('goal', criteria, data , { upsert : true}, function(result) { res.send(result);});
+		}
 	});
 	
 	app.delete('/goal', function(req, res) {
 		console.log("goal delete invoked");
+		console.log("req.body : " + req.body);
 		mongo.deleteMany('goal', req.body, function(result) { res.send(result)});
 	});	
 

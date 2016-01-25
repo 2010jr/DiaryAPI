@@ -3,176 +3,134 @@ var ReactDOM = require('react-dom');
 var d3Util = require('../util');
 var d3 = require('d3');
 var GoalView = require('./GoalView.react');
+var GoalUnit = require('./GoalUnit.react');
 
-var GoalFormView = React.createClass({
+var GoalForm = React.createClass({
 		propTypes: {
-				url: React.PropTypes.string.isRequired,
-				goalTypes: React.PropTypes.array,
-				goalTemplates: React.PropTypes.array
+				goalType: React.PropTypes.string.isRequired,
+				tdate: React.PropTypes.object,
 		},
-		
+
 		getDefaultProps: function() {
 				return {
-						goalTypes: ["year", "month", "week", "day"],
-						goalTemplates: ["goal1", "goal2", "goal3"]
+						tdate: new Date(),
 				}
+		},
+
+		getDefaultGoalList : function() {
+				return [1,2,3].map(function(val){
+						return { _id: d3Util.assignGoalId(this.props.goalType, this.props.tdate, val),
+								type: this.props.goalType,
+								date: d3Util.formatDate(this.props.tdate, this.props.goalType),
+								goal: "",
+						};
+				}.bind(this));
 		},
 
 		getInitialState: function() {
 				return {
-						tdate: new Date(),
-						goalType: "month",
-						goals: [],
-						alerts: []
+						goalList : [],
 				}
 		},
 
 		handleSubmit: function() {
-			var data = { 
-			    type: this.state.goalType,
-				date: d3Util.formatDate(this.state.tdate, this.state.goalType),
-				goals: this.state.goals,
-			};
-			d3.json(this.props.url)
+			var dataSet = this.pickUpGoals().map(function(val) {
+					delete val.parent;
+					return val;
+			});
+
+			d3.json("/goal")
 				.header("Content-Type", "application/json")
-				.post(JSON.stringify(data), function(error, json) {
+				.post(JSON.stringify(dataSet), function(error, json) {
 						if (null != error) {
 								console.log(error);
-								this.setState({
-										alerts: ["Fail to submit"]
-								});
 								return;
 						}
-						console.log(json);
-						this.setState({
-								alerts: ["Succeed to submit"]
-						});
 						return;
 				}.bind(this));
 		},
 
 		handleReset: function() {
-
-		},
-
-		updateChildComponent: function(goalType, tdate) {
-			var previousDate = d3Util.offsetByFormatType(tdate, goalType, -1),
-				higherGoalType = d3Util.getHigherGoalType(goalType);
-			
-			ReactDOM.unmountComponentAtNode(document.getElementById("previous-goal"));
-			ReactDOM.unmountComponentAtNode(document.getElementById("higher-goal"));
-			if (previousDate) {
-					var previousGoalProps = {
-							tdate : previousDate,
-							goalType : goalType,
-							title : "Previous Goal"
-					};
-					ReactDOM.render( <GoalView {...previousGoalProps} />, document.getElementById("previous-goal"));
-			}
-
-			if (higherGoalType) {
-					var higherGoalProps = {
-							tdate : tdate,
-							goalType : higherGoalType,
-							title : "Higher Goal",
-					};
-					ReactDOM.render( <GoalView {...higherGoalProps} />, document.getElementById("higher-goal"));
-			}
-		},
-		
-		handleGoalTypeChange: function(event) {
-			this.getGoalAndUpdate(event.target.value, this.state.tdate);
 			this.setState({
-					goalType: event.target.value,
-					alerts: []
+					goalList : this.getDefaultGoalList(), 
 			});
-			this.updateChildComponent(event.target.value, this.state.tdate);
-		},
-
-		handleDateChange: function(event) {
-			var tdate = d3Util.parseToDate(event.target.value, this.state.goalType);
-			this.getGoalAndUpdate(this.state.goalType, tdate);
-			this.setState({
-					tdate: tdate,
-					alerts: []
-			});
-			this.updateChildComponent(this.state.goalType, tdate);
-		},
-
-		handleGoalChange: function(event, ind) {
-			var goals = this.state.goals;
-			goals[event.target.name] = event.target.value;
-				
-			this.setState({
-					goals: goals,
-			});
+			this.getGoalAndUpdate(this.props.goalType, this.props.tdate);
 		},
 
 		render: function() {
+				console.log("render invoked");
 				return  <div> 
-							<h3>Current Goal</h3>
-							{this.state.alerts.map(function(val,ind) {
-								return <div className="alert alert-success" role="alert" key={"alert" + ind} >{val}</div>;
-							 })
-							}
-						<div className="form-inline">
-						<div className="form-group">
-							<input type={this.state.goalType} className="form-control" value={d3Util.formatDate(this.state.tdate, this.state.goalType)} onChange={this.handleDateChange}></input>
-							<label>Goal Type</label>
-							<select className="form-control" value={this.state.goalType} onChange={this.handleGoalTypeChange}>
-							{this.props.goalTypes.map(function(val,ind) {
-										return <option value={val} key={"goaloption" + ind}>{val}</option>;
-								})
-							}
-							</select>
-						</div>
-					 </div>
-					 <div className="form-group">
-					 {this.state.goals.map(function(val,ind) {
-						return <div key={"goal" + ind}>
-							   	<label>{"Goal" + (ind + 1)}</label>
-								<input type="text" className="form-control" value={val} name={ind} onChange={this.handleGoalChange}></input>
-							   </div>;	
-					  }.bind(this))
+					 {this.state.goalList.map(function(val, index) {
+					 	return <GoalUnit ref={"goal" + index} higherGoal={val.parent} thisGoal={val} key={index}/>;
+					   })
 					 }
-					 </div>
 					 <div className="form-group">
 					 	<button className="btn btn-primary" name="Submit" onClick={this.handleSubmit}>Submit</button>
 						<button className="btn btn-default" name="Reset" onClick={this.handleReset}>Reset</button>
 					 </div>
-					 <div id="previous-goal">
-					 </div>
-					 <div id="higher-goal">
-					 </div>
 				   </div>;
+		},
+
+		componentDidMount: function() {
+				console.log("componentDidMount invoked");
+				this.getGoalAndUpdate(this.props.goalType, this.props.tdate);
 		},
 
 		getGoalAndUpdate: function(goalType, tdate) {
 				d3.json("/goal/" + goalType + "/" + d3Util.formatDate(tdate, goalType), function(error, json) {
-						var goals = ["","",""];
 						if (null != error) {
 								console.log(error);
 								return;
 						}
+						var goalList = this.getDefaultGoalList(); 
 						if (json.length > 0) {
-								if (json[0].goals) {
-										goals = json[0].goals;
-								} else {
-										goals = [json[0].goal1, json[0].goal2, json[0].goal3];
+								goalList = json;
+						}
+						var higherGoalType = d3Util.getHigherGoalType(goalType);
+						if (higherGoalType) {
+								d3.json("/goal/" + higherGoalType + "/" + d3Util.formatDate(tdate, higherGoalType), function(higherError, higherJson) {
+										if (null != error) {
+												console.log(error);
+												return;
+										}
+										goalList = goalList.map(function(val,ind) {
+												if (val.parentId) {
+														var parentList = higherJson.filter(function(hVal) {
+																return val.parentId === hVal._id;
+														});
+														if (parentList.length > 0) {
+																val.parent = parentList[0];
+																val.parentId = parentList[0]._id;
+														}	
+												} else {
+													if(higherJson && higherJson[ind]) {
+															val.parent = higherJson[ind];
+															val.parentId = higherJson[ind]._id;
+													}
+												};
+												return val;	
+										});
+										this.setState({
+												goalList : goalList
+										});
+								}.bind(this));
+						} else {
+								if (json.length > 0) {
+										this.setState({
+												goalList : json,
+										});
 								}
 						}
-						this.setState({
-								goals : goals,
-						});
 				}.bind(this));	   
 		},
 
-		componentDidMount: function() {
-				var previousDate = d3Util.offsetByFormatType(this.state.tdate, this.state.goalType, -1),
-					higherGoalType = d3Util.getHigherGoalType(this.state.goalType);
-				this.getGoalAndUpdate(this.state.goalType, this.state.tdate);
-				this.updateChildComponent(this.state.goalType, this.state.tdate);
+		pickUpGoals: function() {
+			return this.state.goalList.map(function(val,index) {
+					var goalUnit = this.refs["goal" + index];
+					val.goal = goalUnit.getGoalValue();
+					return val;
+				}.bind(this));
 		},
 });
 
-module.exports = GoalFormView;
+module.exports = GoalForm;

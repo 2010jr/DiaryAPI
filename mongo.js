@@ -40,10 +40,6 @@ function insert(collect_name, document, options, callback) {
 
 function update(collect_name, criteria, document, options, callback) {
 	console.log("update invoked");
-	console.log(collect_name);
-	console.log(criteria);
-	console.log(document);
-	console.log(options);
 	db.collection(collect_name, function(outer_err, collection) {
 		collection.update(criteria, document, options, function(inner_err, result) {
 				if(null != inner_err) {
@@ -57,7 +53,7 @@ function update(collect_name, criteria, document, options, callback) {
 function deleteMany(collect_name, criteria, options, callback) {
 	console.log("delete invoked");
 	db.collection(collect_name, function(outer_err, collection) {
-			collection.deleteMany(criteria, option, function(inner_err, result) {
+			collection.deleteMany(criteria, options, function(inner_err, result) {
 					callback(result);
 			});
 	});
@@ -66,5 +62,6 @@ function deleteMany(collect_name, criteria, options, callback) {
 module.exports = {
 	find: find,
 	insert: insert,
-	update: update
+	update: update,
+	deleteMany: deleteMany
 }

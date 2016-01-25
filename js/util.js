@@ -61,6 +61,17 @@ var d3Util = function() {
 						return higherGoalTypes.length > 0 ? higherGoalTypes[0] : null;
 				},
 
+				getLowerGoalType : function(goalType) {
+						return ["year", "month", "week", "day"].find(function(val, ind, array) {
+								return goalType === array[ind - 1];
+						});
+				},
+
+				assignGoalId : function(goalType, date, index) {
+						console.log("assignGoalId invoked");
+						return goalType + "_" + d3Util.formatDate(date, goalType) + "_" + index;
+				},
+
 				buildCalendarSvg: function(selector, sDate, eDate, cellsize) {
 						var width = cellsize * 7; 
 						var height = cellsize * (6 + 1); //including month title

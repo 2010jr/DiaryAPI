@@ -7,6 +7,7 @@
 			<link rel="stylesheet" href="/bootstrap/dist/css/bootstrap-theme.min.css" >
 			<script src="/bootstrap/dist/js/bootstrap.min.js"></script>
 			<link rel="stylesheet" href="/css/calendar.css" >
+			<link rel="stylesheet" href="/css/goal.css" >
 			<link rel="stylesheet" href="/colorbrewer/colorbrewer.css" >
 		</head>
 		<body>
@@ -25,7 +26,16 @@
 								<ul class="nav navbar-nav">
 										<li role="presentation"><a id="nav-menu-diary" href="#">Diary</a></li>
 										<li role="presentation"><a id="nav-menu-calendar" href="#">Calendar</a></li>
-										<li role="presentation"><a id="nav-menu-goal" href="#">Goal</a></li>
+										<li role="presentation" class="dropdown">
+										<a className="dropdown-toggle" href="#" aria-haspopup="true" aria-expanded="true" data-toggle="dropdown">Goal<span class="caret"></span></a>
+											<ul class="dropdown-menu" id="nav-menu-goal">
+													<li><a name="year" href="#">Annually</a></li>
+													<li><a name="quater" href="#">Quarterly</a></li>
+													<li><a name="month" href="#">Monthly</a></li>
+													<li><a name="week" href="#">Weekly</a></li>
+													<li><a name="day" href="#">Daily</a></li>
+											</ul>
+										</li>
 								</ul>
 						</div>
 				</div>
