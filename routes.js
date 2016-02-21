@@ -36,7 +36,7 @@ function basicAuthenticate(req, res, next) {
 }
 		
 function authenticate(res) {
-		var realm = "test";
+		var realm = "Diary App";
 		res.writeHead(401, {
 				'WWW-Authenticate': 'Basic realm="' + realm + '"'
 		});
@@ -57,7 +57,7 @@ router = function(app, server) {
 	app.get('/', function(req, res) {
 		res.redirect('/index.html');
 	});
-	app.get('/diary?', function(req, res) {
+	app.get('/:_diaryOrGoal(diary\|goal)?', function(req, res) {
 		var criteria = { user : extractUserName(req)};
 		for( var props in req.query) {
 			if (req.query.hasOwnProperty(props)) {
@@ -66,33 +66,33 @@ router = function(app, server) {
 			}
 		}
 		console.log("criteria : " + criteria);
-		mongo.find('diary', criteria, {}, function(list) { res.json(list);});
+		mongo.find(req.params._diaryOrGoal, criteria, {}, function(list) { res.json(list);});
 	});	
-	app.get('/diary/:_date', function(req, res) {
-		mongo.find('diary', { user: extractUserName(req) , date: req.params._date }, {}, 
+
+	app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(month\|week\|day)/:_date', function(req, res) {
+		mongo.find(req.params._diaryOrGoal, { user: extractUserName(req) ,  type: req.params._goalType, date: req.params._date}, {}, 
 			function(list) {
 				res.json(list);
 			}
 		);
 	});
-	app.get('/template/:_templateName', function(req, res) {
-		mongo.find('template', { user: extractUserName(req) , templateName : req.params._templateName}, {},
-			function(list) {
-				res.json(list);
-			}
-		);
-	});
-	app.get('/template?', function(req, res) {
-		var criteria = { user : extractUserName(req)};
+
+	app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(month\|week\|day)?', function(req,res) {
+		console.log("get goal invoked");
+		var criteria = { user : extractUserName(req), type: req.params._goalType };
 		for( var props in req.query) {
 			if (req.query.hasOwnProperty(props)) {
 				console.log(req.query[props]);
 				criteria[props] = req.query[props];
 			}
 		}
-		console.log("criteria : " + criteria);
-		mongo.find('template', criteria, {}, function(list) { res.json(list);});
-	});	
+		mongo.find(req.params._diaryOrGoal, criteria , {}, 
+			function(list) {
+				res.json(list);
+			}
+		);
+	});
+
 
 	app.post('/diary', function(req, res) {
 		var criteria = {
@@ -105,59 +105,8 @@ router = function(app, server) {
 		mongo.update('diary', criteria, req.body, { upsert : true} , function(result) { res.send(result);});
 	});
 
-	app.post('/template', function(req, res) {
-		//重複チェックが必要
-		console.log(req.body);
-		var criteria = { 
-			user: extractUserName(req), 
-			templateName: req.body.templateName
-		};
-		var data = req.body;
-		data.user = extractUserName(req);
-
-		mongo.update('template', criteria, req.body, { upsert : true}, function(result) { res.send(result);});
-	});
 	
-	app.get('/goal/:_type(year\|month\|week\|day\|other)/:_date', function(req,res) {
-		console.log("get goal invoked");
-		console.log(req.params);
-		mongo.find('goal', { user : extractUserName(req) , type: req.params._type, date: req.params._date }, {}, 
-			function(list) {
-				res.json(list);
-			}
-		);
-	});
-
-	app.get('/goal?', function(req,res) {
-		var criteria = { user : extractUserName(req)};
-		for( var props in req.query) {
-			if (req.query.hasOwnProperty(props)) {
-				console.log(req.query[props]);
-				criteria[props] = req.query[props];
-			}
-		}
-		console.log("criteria : " + criteria);
-		mongo.find('goal', criteria, {}, function(list) { res.json(list);});
-	});
-
-	app.get('/goal/:_type(year\|month\|week\|day\|other)?', function(req,res) {
-		console.log("get goal invoked");
-		var criteria = { user : extractUserName(req), type: req.params._type };
-		for( var props in req.query) {
-			if (req.query.hasOwnProperty(props)) {
-				console.log(req.query[props]);
-				criteria[props] = req.query[props];
-			}
-		}
-		mongo.find('goal', criteria , {}, 
-			function(list) {
-				res.json(list);
-			}
-		);
-	});
-
 	app.post('/goal', function(req, res) {
-		console.log("goal post invoked");
 		if (Array.isArray(req.body)) {
 			    var	user = extractUserName(req);
 				var ids = req.body.map(function(val) {return val._id;});
@@ -179,21 +128,10 @@ router = function(app, server) {
 		}
 	});
 	
-	app.delete('/goal', function(req, res) {
-		console.log("goal delete invoked");
+	app.delete('/:_diaryOrGoal(diary\|goal)', function(req, res) {
 		console.log("req.body : " + req.body);
-		mongo.deleteMany('goal', req.body, function(result) { res.send(result)});
+		mongo.deleteMany(req.params._diaryOrGoal, req.body, function(result) { res.send(result);});
 	});	
-
-	app.delete('/template', function(req, res) {
-		console.log("template delete invoked");
-		mongo.deleteMany('template', req.body,function(result) { res.send(result)});
-	});
-
-	app.delete('/diary', function(req, res) {
-		console.log("template delete invoked");
-		mongo.deleteMany('template', req.body,function(result) { res.send(result)});
-	});
-}
+};
 
 module.exports = { router: router};

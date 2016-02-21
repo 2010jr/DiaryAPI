@@ -1,6 +1,6 @@
 var React = require('react');
-var d3Util = require('../util');
-var d3 = require('d3');
+var DateUtil = require("../DateUtil");
+var AjaxUtil = require("../AjaxUtil");
 
 var GoalView = React.createClass({
 		propTypes: {
@@ -20,7 +20,7 @@ var GoalView = React.createClass({
 					<div className="form-inline">
 						<h3> {this.props.title} </h3>
 						<div className="form-group">
-							<input disabled type={this.props.goalType} className="form-control" value={d3Util.formatDate(this.props.tdate, this.props.goalType)}></input>
+							<input disabled type={this.props.goalType} className="form-control" value={DateUtil.format(this.props.tdate, this.props.goalType)}></input>
 							<label>Goal Type</label>
 							<div disabled className="form-control">
 						   		{this.props.goalType}
@@ -41,19 +41,14 @@ var GoalView = React.createClass({
 
 		componentDidMount: function() {
 				var refs = this.refs;
-				var props = this.props;
-				d3.json("/goal/" + this.props.goalType + "/" + d3Util.formatDate(this.props.tdate, this.props.goalType), function(error, json) {
+				AjaxUtil.getGoals(this.props.goalType, this.props.tdate, function(error, json) {
 						var goals = [];
 						if (null != error) {
 								console.log(error);
 								return;
 						}
 						if (json.length > 0) {
-							if (json[0].goals) {
 								goals = json[0].goals;
-							} else {
-								goals = [json[0].goal1, json[0].goal2, json[0].goal3];
-							}
 						}
 						this.setState({
 								goals: goals,

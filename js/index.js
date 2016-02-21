@@ -1,40 +1,20 @@
 var React = require('react');
 var ReactDOM = require('react-dom');
+var PageView = require("./components/PageView.react");
 
-var d3 = require('d3');
+//It is only debugging in brower
 window.React = require('react');
-var DiaryForm = require('./components/DiaryForm.react');
-var CalendarView = require('./components/CalendarView.react');
-var GoalForm = require('./components/GoalForm.react');
-var GoalUnit = require('./components/GoalUnit.react');
-var TemplateView = require('./components/TemplateView.react');
 
-var props = {};
-props.url = "/diary";
-
-document.getElementById("nav-menu-diary").onclick = function() {
-		ReactDOM.render(
-						<DiaryForm {...props} />
-						, document.getElementById("container-view")
-		);
-		return false;
-};
-
-document.getElementById("nav-menu-calendar").onclick = function() {
-		ReactDOM.render(
-						<CalendarView {...props} />
-						, document.getElementById("container-view")
-		);
-		return false;
-};
-
-document.getElementById("nav-menu-goal").onclick = function(event) {
-		console.log(event.target.name);
-		var container = document.getElementById("container-view");
-		ReactDOM.unmountComponentAtNode(container);
-		ReactDOM.render(
-						<GoalForm goalType={event.target.name} />
-						, container 
-					   );
-		return false;
-};
+var container = document.getElementById("container-view");
+Array.prototype.forEach.call(document.getElementById("nav-menu").getElementsByClassName("dropdown-menu"), function(val) {
+		val.onclick = function(event) {
+				ReactDOM.unmountComponentAtNode(container);
+				var pageTypeAndGoalType = event.target.name.split(":");
+				var props = {
+						defaultPageType : pageTypeAndGoalType[0], 
+						defaultGoalType : pageTypeAndGoalType[1] 
+				};
+				ReactDOM.render(<PageView { ...props} />, container); 
+				return false;
+		};
+});

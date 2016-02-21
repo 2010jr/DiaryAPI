@@ -1,7 +1,4 @@
 var React = require('react');
-var ReactDOM = require('react-dom');
-var d3 = require('d3');
-var d3Util = require('../util');
 
 var GoalUnit = React.createClass({
 		propTypes: {

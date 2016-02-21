@@ -1,178 +1,201 @@
 var React = require('react');
-var ReactPropTypes = React.PropTypes;
-var jQuery = require('jquery');
-var d3Util = require('../util');
+var ReactDOM = require('react-dom');
+var DateUtil = require('../DateUtil');
+var AjaxUtil = require('../AjaxUtil');
+var DiaryUnit = require('./DiaryUnit.react');
+var Modal = require('./Modal.react');
 
 var DiaryForm = React.createClass({
 		propTypes: {
-				url: React.PropTypes.string
+				goalType: React.PropTypes.string.isRequired,
+				tdate: React.PropTypes.object,
+				changePage: React.PropTypes.func
 		},
 
 		getDefaultProps: function() {
-
-		},
-
-		getInitialState: function() {
 				return {
-					 	alerts : [],
-						goals: [],
-						evaluates: [], 
-						comments: [],
-						freeComments: [''],
 						tdate: new Date()
 				};
 		},
 
-		handleChangeForm: function(name,e) {
-				var change = {};
-				if (name && this.state[name]) {
-						change[name] = this.state[name];
-				}
-				if (e.target.name) {
-						change[name][e.target.name] = e.target.value;
-				} else {
-						change[name] = e.target.value;
-				}
-				this.setState(change);
-		},
-
-		hasElement : function(array) {
-				if (Array.isArray(array) && array.length > 0) {
-						return true;
-				} else {
-						return false;
-				}
-		},
-
-		getGoalAndUpdate: function(goalType, tdate) {
-				jQuery.get("goal" + "/" + goalType + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
-						if(this.hasElement(data)) {
-							if(data[0].goals) {
-								this.setState({
-									goals : data[0].goals,
-								});
-							} else {
-								this.setState({
-									goals : [data[0].goal1, data[0].goal2, data[0].goal3],
-								});
-							}
-						} else {
-							this.setState({
-								goals : []
-							});
-						}
-				}.bind(this));
-		},
-
-		getDiaryAndUpdate: function(goalType, tdate) {
-				jQuery.get("diary" + "/" + d3Util.formatDate(tdate, goalType), {}, function(data) {
-						if (this.hasElement(data)) {
-								this.setState({
-										evaluates : data[0].evaluates ? data[0].evaluates : [],
-										comments : data[0].comments ? data[0].comments : [],
-										freeComments: data[0].freeComments ? data[0].freeComments : []
-								});
-						} else {
-								this.setState({
-										evaluates : [1,1,1],
-										comments: ['','',''],
-										freeComments: ['']
-								});
-						}
-				}.bind(this));
-		},
-
-		componentDidMount: function() {
-				this.getGoalAndUpdate("month", this.state.tdate);
-				this.getDiaryAndUpdate("day", this.state.tdate);
-		},
-
-		handleSubmit : function() {
-			var data = {
-					date : d3Util.formatDate(this.state.tdate, "day"),
-					evaluates : this.state.evaluates, 
-					comments : this.state.comments, 
-					freeComments : this.state.freeComments
-			};	
-
-			console.log(data);
-			
-			d3.json(this.props.url)
-					.header("Content-Type", "application/json")
-					.post(JSON.stringify(data), function(error, json) {
-							if (null != error) {
-									console.log(error);
-									this.setState({
-											alerts : ["Fail to submit"]
-									});
-									return;
-							}
-							console.log(json);
-							
-							this.setState({
-									alerts : ["Succeed to submit"]
-							});
-							return;
-					}.bind(this));	
-		},
-
-		handleReset : function() {
-
-		},
-
-		handleDateChange: function(event) {
-			var tdate = d3Util.parseToDate(event.target.value, "day");
-			this.setState({
-					tdate: tdate,
-					alerts: []
-			});
-
-			this.getGoalAndUpdate("month", tdate);
-			this.getDiaryAndUpdate("day", tdate);
+		getInitialState: function() {
+				return {
+						goalComments: [],
+						freeComments: [],
+					    isReadyToShowForm: false
+				};
 		},
 
 		render: function() {
-				// Set variable to access in each map method.(Do not use this keyword in map method)
-				return <div> 
-							{this.state.alerts.map(function(val) {
-								return <div className="alert alert-success" role="alert">{val}</div>;
-							 })
+				return <div>
+							{this.buildDiaryForm()}
+							{this.buildMsg()}
+					   </div>;
+		},
+
+		componentDidMount: function() {
+				AjaxUtil.getDiaries(this.props.goalType, this.props.tdate, null, this.initDiaryByDiary);
+		},
+
+		createReTryMsgProp : function(message) {
+				var _this = this;
+				return {
+						message : "エラー 原因 : " + message + " もう一度試してもらえますか？",
+						linksToAct: [{
+								name : "元の画面に戻ります",
+								func : function() { _this.setState({ msgProps : null}); }
+						}]
+				};
+		},
+
+		createSetGoalMsgProp : function() {
+				var _this = this;
+				return {
+						message : "目標が未設定です。日記を書くために目標設定を行いましょう",
+						linksToAct: [{
+								name : "目標設定しますか？",
+								func : function() { 
+										_this.props.changePage("Goal", _this.props.goalType, _this.props.tdate);
+								}
+						}]
+				};
+		},
+
+		createMsgAfterSubmitProp : function() {
+				var nextDate = DateUtil.offsetDate(this.props.tdate, this.props.goalType, 1),
+					_this = this;
+				return {
+						message : "日記登録が完了しました",
+						linksToAct: [
+						{
+								name : "明日の目標を変更しますか？",
+								func : function() { 
+										_this.props.changePage("Goal", _this.props.goalType, nextDate);
+								}
+						},
+						{
+								name: "明日も同じ目標にしますか？",
+								func : function() {
+										var data = _this.generateSubmitData(nextDate);	
+										_this.setState({ msgProps : null});
+										console.log(data);
+										AjaxUtil.postDiary(data, function(error, json) {});
+								}
+						}
+						]
+				};
+		},
+
+		initDiaryByGoal: function(error, json) {
+				if(json && json.length > 0) {
+						var goalSummaries = json.map(function(val) {
+								return {
+										goalId : val._id,
+										goal: val.goal,
+										comment : ''
+								};
+						});
+						this.setState({
+								goalComments: goalSummaries,
+								freeComments: [{
+										name: "自由メモ",
+										comment: ""
+								}],
+								rate: '',
+								isReadyToShowForm: true
+						});
+				} else {
+						this.setState({
+								msgProps : this.createSetGoalMsgProp(),
+						});
+				}
+		},
+
+		initDiaryByDiary: function(error, json) {
+				if (json && json.length > 0) {
+						this.setState({
+								goalComments: json[0].goalComments,
+								freeComments: json[0].freeComments,
+								rate: json[0].rate,
+								isReadyToShowForm: true,
+								msg: null
+						});
+				} else {
+						AjaxUtil.getGoals(this.props.goalType, this.props.tdate, null, this.initDiaryByGoal);
+				}
+		},
+
+		generateSubmitData: function(tdate) {
+			var goalComments = this.state.goalComments.map(function(val,ind) { 
+					val.comment = this.refs[this.assignId(val.goal,ind)].getComment(); 
+					return val;
+			}.bind(this));
+			var freeComments = this.state.freeComments.map(function(val,ind) { 
+					val.comment = this.refs[this.assignId(val.name,ind)].getComment(); 
+					return val;
+			}.bind(this));
+
+			var data = {
+					date : DateUtil.format(tdate, this.props.goalType),
+					rate: this.refs.rate.value, 
+					goalComments : goalComments,
+					freeComments : freeComments,
+					type: this.props.goalType
+			};	
+			return data;
+		},
+
+		handleSubmit : function() {
+			var data = this.generateSubmitData(this.props.tdate),
+				_this = this;
+			AjaxUtil.postDiary(data, 
+							function(error, json) { 
+									_this.setState({ 
+											msgProps: _this.createMsgAfterSubmitProp(),
+									});
 							}
-							<div className="input-group">
-								<span className="input-group-addon">Date</span>
-								<input id="diary_form_tdate" className="form-control" name="date" type="date" value={d3Util.formatDate(this.state.tdate, "day")} onChange={this.handleDateChange} />
-							</div>
-							<div className="row"></div>
-							{this.state.goals.map(function(val,ind) {
-								return <div className="panel panel-default">
-										<div className="panel-heading form-inline">
-											<label className="panel-title">{val}</label>
-									   		<select className="form-control" value={this.state.evaluates[ind]} name={ind} onChange={this.handleChangeForm.bind(this, "evaluates")}>
-													{['',1,2,3,4,5].map(function(num) {
-															return <option value={num}>{num}</option>;
-													})}
-											</select>
-										</div>
-										<div className="panel-body">
-									   		<textarea className="form-control" rows="3" type="text" name={ind} value={this.state.comments[ind]} onChange={this.handleChangeForm.bind(this, "comments")}/>
-										</div>
-								 	  </div>
-							 }.bind(this))
-							}
-							{this.state.freeComments.map(function(val,ind) {
-								return <div className="panel panel-default">
-										<div className="panel-heading form-inline">
-											<label className="panel-title">Free Comments</label>
-										</div>
-										<div className="panel-body">
-									   		<textarea className="form-control" rows="5" type="text" name={ind} value={val} onChange={this.handleChangeForm.bind(this, "freeComments")} />
-										</div>
-								 	  </div>
-						   	}.bind(this))
-							}
-							<button className="btn btn-primary" onClick={this.handleSubmit}>Submit</button>
-							<button className="btn btn-default" onClick={this.handleReset}>Cancel</button>	
-					 </div>;
+			);
+		},
+
+		assignId: function(goal, ind) {
+			return goal + "_" + ind;
+		},
+
+		buildDiaryForm: function() {
+				if(!this.state.isReadyToShowForm) return;
+				return <div>
+						{this.buildRate(this.props.goalType,this.props.tdate, this.state.rate)}
+						{this.state.goalComments.map(function(val,ind) {
+							var id = this.assignId(val.goal,ind);
+							return <DiaryUnit goal={val.goal} comment={val.comment} textRow={2} ref={id} key={id}/>;
+						}.bind(this))
+						}
+						{this.state.freeComments.map(function(val,ind) {
+							var id = this.assignId(val.name,ind);
+							return <DiaryUnit goal={val.name} comment={val.comment} ref={id} key={id}/>;
+						 }.bind(this))
+						}
+						<button className="btn btn-success" onClick={this.handleSubmit}>Save</button>
+					   </div>;		
+		},
+
+		buildRate: function(goalType,tdate,rate) {
+			return <div className="form-inline">
+					<label>{DateUtil.viewFormat(tdate, goalType)}</label>
+					<select defaultValue={rate} className="form-control" ref="rate">
+						{['',1,2,3,4,5].map(function(val) {
+										return <option value={val} key={val}>{val}</option>;
+														   }
+										)
+						}
+					</select>
+					</div>;
+		},
+
+		buildMsg: function() {
+				if(this.state.msgProps) {
+						return <Modal {...this.state.msgProps} />;
+				}
 		}
 });
 

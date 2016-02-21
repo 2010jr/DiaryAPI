@@ -8,6 +8,7 @@
 			<script src="/bootstrap/dist/js/bootstrap.min.js"></script>
 			<link rel="stylesheet" href="/css/calendar.css" >
 			<link rel="stylesheet" href="/css/goal.css" >
+			<link rel="stylesheet" href="/css/diary.css" >
 			<link rel="stylesheet" href="/colorbrewer/colorbrewer.css" >
 		</head>
 		<body>
@@ -22,18 +23,23 @@
 								</button>
 								<a class="navbar-brand" href="#">DiaryApp</a>
 						</div>
-						<div class="collapse navbar-collapse" id="nav-menu-1">
+						<div class="collapse navbar-collapse" id="nav-menu">
 								<ul class="nav navbar-nav">
-										<li role="presentation"><a id="nav-menu-diary" href="#">Diary</a></li>
+										<li role="presentation" class="dropdown">
+										<a className="dropdown-toggle" href="#" aria-haspopup="true" aria-expanded="true" data-toggle="dropdown">Diary<span class="caret"></span></a>
+											<ul class="dropdown-menu">
+													<li><a name="Diary:month" href="#">Monthly</a></li>
+													<li><a name="Diary:week" href="#">Weekly</a></li>
+													<li><a name="Diary:day" href="#">Daily</a></li>
+											</ul>
+										</li>
 										<li role="presentation"><a id="nav-menu-calendar" href="#">Calendar</a></li>
 										<li role="presentation" class="dropdown">
 										<a className="dropdown-toggle" href="#" aria-haspopup="true" aria-expanded="true" data-toggle="dropdown">Goal<span class="caret"></span></a>
-											<ul class="dropdown-menu" id="nav-menu-goal">
-													<li><a name="year" href="#">Annually</a></li>
-													<li><a name="quater" href="#">Quarterly</a></li>
-													<li><a name="month" href="#">Monthly</a></li>
-													<li><a name="week" href="#">Weekly</a></li>
-													<li><a name="day" href="#">Daily</a></li>
+											<ul class="dropdown-menu">
+													<li><a name="Goal:month" href="#">Monthly</a></li>
+													<li><a name="Goal:week" href="#">Weekly</a></li>
+													<li><a name="Goal:day" href="#">Daily</a></li>
 											</ul>
 										</li>
 								</ul>

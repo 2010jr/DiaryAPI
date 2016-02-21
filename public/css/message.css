@@ -1,0 +1,19 @@
+.alert-enter {
+	-webkit-transition: opacity 3s ease-in-out;
+	-moz-transition: opacity 3s ease-in-out;
+	-ms-transition: opacity 3s ease-in-out;
+	-o-transition: opacity 3s ease-in-out;
+	opacity: 1;
+}
+
+.alert-leave {
+	opacity: 0;
+}
+
+.alert-leave.alert-leave-active {
+	-webkit-transition: opacity 3s ease-in-out;
+	-moz-transition: opacity 3s ease-in-out;
+	-ms-transition: opacity 3s ease-in-out;
+	-o-transition: opacity 3s ease-in-out;
+	opacity: 0.1;
+}

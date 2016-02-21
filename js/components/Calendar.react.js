@@ -1,49 +1,50 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
-var d3Util = require('../util');
+var D3Util = require('../D3Util');
 var d3 = require('d3');
 
 var Calendar = React.createClass({
 		propTypes: {
 				tdate : React.PropTypes.object,
 				dataSet : React.PropTypes.array,
-				activeIndex : React.PropTypes.number,
 		},
 
 		getDefaultProps: function() {
 				return {
 						tdate : new Date(),
 						dataSet : [],
-						activeIndex: 0,
 				}
 		},
 
 		render : function() {
-			return <div id="Calendar"></div>;
+			return <div>
+					<p>{D3Util.month_format(this.props.tdate)}</p>
+					<div id="Calendar"></div>
+				   </div>;
 		},
 
 		componentDidMount: function() {
-			var sDate = d3Util.date_format(d3Util.nextMonthFirstDate(this.props.tdate)),
-				eDate = d3Util.date_format(d3Util.thisMonthFirstDate(this.props.tdate));
+			var sDate = D3Util.date_format(D3Util.nextMonthFirstDate(this.props.tdate)),
+				eDate = D3Util.date_format(D3Util.thisMonthFirstDate(this.props.tdate));
 
 			this.buildCalendar("#Calendar", sDate, eDate, 50);
-			this.updateCalendar(this.props.dataSet, this.props.activeIndex);
+			this.updateCalendar(this.props.dataSet);
 		},
 
 		buildCalendar : function(selector,sDate, eDate, cellsize) {
-				var svg = d3Util.buildCalendarSvg(selector,sDate, eDate, cellsize);
-				var weekTitle = d3Util.buildWeekTitle(svg, cellsize);
-				var dayGroup = d3Util.buildDayGroup(svg);
-				var rect = d3Util.buildRect(dayGroup, cellsize); 
-				var daytext = d3Util.buildDayText(dayGroup, cellsize);
-				var tooltip = d3Util.buildToolTip(selector, "tooltip");
+				var svg = D3Util.buildCalendarSvg(selector,sDate, eDate, cellsize);
+				var weekTitle = D3Util.buildWeekTitle(svg, cellsize);
+				var dayGroup = D3Util.buildDayGroup(svg);
+				var rect = D3Util.buildRect(dayGroup, cellsize); 
+				var daytext = D3Util.buildDayText(dayGroup, cellsize);
+				var tooltip = D3Util.buildToolTip(selector, "tooltip");
 		},
 
-		updateCalendar : function(dataSet, activeIndex) {
+		updateCalendar : function(dataSet) {
 			if( !dataSet || !Array.isArray(dataSet) || dataSet.length === 0) {
 					return;
 			}
-			var today = d3Util.date_format(new Date()),
+			var today = D3Util.date_format(new Date()),
 				that = this, 
 			    data = d3.nest()
 						 .key(function(d) { return d.date;})
@@ -56,7 +57,7 @@ var Calendar = React.createClass({
 
 
 			rect.filter(function(d) { return d in data;})
-					.attr("class", function(d) { return "day-off " + color(data[d][0].evaluates[activeIndex]);})
+					.attr("class", function(d) { return "day-off " + color(data[d][0].rate);})
 					.select("title");
 
 			rect.filter(function(d) { return (!( d in data) && d < today);})
@@ -71,7 +72,7 @@ var Calendar = React.createClass({
 							tooltip.transition()
 									.duration(100)
 									.style("opacity", .9);
-							tooltip.html(that.formatTooltipText(data[d][0], activeIndex))
+							tooltip.html(that.formatTooltipText(data[d][0]))
 									.style("left", (d3.event.pageX) + 30 + "px")
 									.style("top", (d3.event.pageY) + "px");
 					}
@@ -87,12 +88,26 @@ var Calendar = React.createClass({
 
 					$("div.tooltip").empty();
 			});
+			rect.on("click", function(d) {
+					//TODO
+					//Write to update container code 
+					console.log("Click is invoked");
+					console.log(d);
+			});
 		},
 
-		formatTooltipText: function(data, ind) {
-			return ("<p>" + data.date + "</p>" + 
-				    "<p>Evaluate : " + data.evaluates[ind] + "</p>" + 
-					"<p>Comment : " + data.comments[ind] + "</p>");
+		formatTooltipText: function(data) {
+		    var rateTag = "<h6>Rate:" + data.rate + "</h6>",
+				goalCommentTag = data.goalComments.map(function(val) {
+					return "<tr><td>" + val.goal + "</td>" + 
+							"<td>" + val.comment + "</td></tr>";
+				}).join(''),
+				freeCommentTag = data.freeComments.map(function(val) {
+					return "<tr><td>" + val.name + "</td>" + 
+							"<td>" + val.comment + "</td></tr>";
+				}).join('');
+				header = "<tr><th>Goal</th><th>Comment</th></tr>";
+			return rateTag + "<table class=table>" + header + goalCommentTag + freeCommentTag + "</table>";
 		},
 
 		componentWillUnmount : function() {
