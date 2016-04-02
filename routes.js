@@ -16,6 +16,7 @@ function extractUserName(req) {
 }
 
 function basicAuthenticate(req, res, next) {
+	
 	var auth,
 	    login;
 	
