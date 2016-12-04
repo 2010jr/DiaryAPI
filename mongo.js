@@ -3,7 +3,7 @@
 var db;
 var mongo_client = require('mongodb').MongoClient
 var assert = require('assert');
-var url = 'mongodb://bluemix:ibmbluemix@ds119618.mlab.com:19618/goal-diary;';
+var url = 'mongodb://bluemix:ibmbluemix@ds119618.mlab.com:19618/goal-diary';
 
 mongo_client.connect(url, function(err, mongodb) {
  assert.equal(null, err);
