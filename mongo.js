@@ -6,6 +6,7 @@ var assert = require('assert');
 var url = 'mongodb://bluemix:ibmbluemix@ds119618.mlab.com:19618/goal-diary';
 
 mongo_client.connect(url, function(err, mongodb) {
+ console.log(err);
  assert.equal(null, err);
  console.log("Connected correctly to server: " + mongodb);
  db = mongodb;
