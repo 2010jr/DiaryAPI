@@ -1,9 +1,10 @@
 var d3 = require("d3");
 var DateUtil = require("./DateUtil");
+var Const = require("./Constants");
 
 module.exports = function() {
 		var RESOURCE_TYPES = ["diary","goal"],
-			GOAL_TYPES = ["month","week","day"];
+			GOAL_TYPES = Const.GOAL_TYPES;
 
 		var funcGetBase = function (url, callback) {
 				d3.json(url, function(error, json) {

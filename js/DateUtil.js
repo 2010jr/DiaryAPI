@@ -1,4 +1,5 @@
 var d3 = require('d3');
+var Const = require('./Constants');
 
 module.exports = function() {
 		// Date Format variables
@@ -15,16 +16,19 @@ module.exports = function() {
 			dayFormat = d3.time.format("%Y-%m-%d"),
 			monthFormat= d3.time.format("%Y-%m"),
 			weekFormat= d3.time.format("%Y-W%U"),
-			FORMAT_TYPES = ["year", "month", "week", "day"],
-			VIEW_FORMAT_TYPES = ["year", "month", "week", "day"];
+			FORMAT_TYPES = Const.GOAL_TYPES, 
+			VIEW_FORMAT_TYPES = Const.GOAL_TYPES; 
 
 		var FORMAT_FUNC_MAP = {
 				"year" : yearFormat,
+				"quarter" : monthFormat, 
 				"month" : monthFormat,
 				"week" : weekFormat,
 				"day" : dayFormat
 		},
 		VIEW_FORMAT_FUNC_MAP = {
+				"year" : yearFormat,
+				"quarter" : monthFormat, 
 				"month" : monthFormat,
 				"week" : function(date) { return monthFormat(date) + "-Week " + weekOfMonth(date);},
 				"day" : dayFormat
@@ -67,6 +71,9 @@ module.exports = function() {
 						switch (formatType)  {
 								case "year" :
 										return new Date(yearNum + offset, monthNum, dayNum);
+								case "quarter" :
+										var offsetMonth = parseInt(offset) * 3;
+										return new Date(yearNum, monthNum + offsetMonth, dayNum);
 								case "month" : 
 										return new Date(yearNum, monthNum + offset, dayNum); 
 								case "week" : 

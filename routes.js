@@ -70,7 +70,7 @@ router = function(app, server) {
 		mongo.find(req.params._diaryOrGoal, criteria, {}, function(list) { res.json(list);});
 	});	
 
-	app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(month\|week\|day)/:_date', function(req, res) {
+	app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(year\|quarter\|month\|week\|day)/:_date', function(req, res) {
 		mongo.find(req.params._diaryOrGoal, { user: extractUserName(req) ,  type: req.params._goalType, date: req.params._date}, {}, 
 			function(list) {
 				res.json(list);
@@ -78,7 +78,7 @@ router = function(app, server) {
 		);
 	});
 
-	app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(month\|week\|day)?', function(req,res) {
+	app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(year\|quarter\|month\|week\|day)?', function(req,res) {
 		console.log("get goal invoked");
 		var criteria = { user : extractUserName(req), type: req.params._goalType };
 		for( var props in req.query) {
