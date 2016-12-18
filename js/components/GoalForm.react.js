@@ -69,14 +69,17 @@ var GoalForm = React.createClass({
 
 		buildGoalForm : function() {
 				return <div> 
+				<div>
+					<h3>{DateUtil.format(this.props.tdate, this.props.goalType)}</h3>
+				</div>
 				{this.state.goalList.map(function(val, index) {
 																	  return <GoalUnit ref={"goal" + index} higherGoal={val.parent} thisGoal={val} key={index}/>;
 															  })
 				}
 				<div className="form-group">
 						<button className="btn btn-success" name="Submit" onClick={this.handleSubmit}>Submit</button>
-						</div>
-						</div>;
+				</div>
+				</div>;
 		},
 
 		buildMsg: function() {
