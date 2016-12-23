@@ -1,15 +1,13 @@
-'use strict';
+let db;
+let mongo_client = require('mongodb').MongoClient;
+let assert = require('assert');
+const url = 'mongodb://bluemix:ibmbluemix@ds119768.mlab.com:19768/goal-diary-dev';
 
-var db;
-var mongo_client = require('mongodb').MongoClient
-var assert = require('assert');
-var url = 'mongodb://bluemix:ibmbluemix@ds119768.mlab.com:19768/goal-diary-dev';
-
-mongo_client.connect(url, function(err, mongodb) {
- console.log(err);
- assert.equal(null, err);
- console.log("Connected correctly to server: " + mongodb);
- db = mongodb;
+mongo_client.connect(url, function (err, mongodb) {
+  console.log(err);
+  assert.equal(null, err);
+  console.log("Connected correctly to server: " + mongodb);
+  db = mongodb;
 });
 
 function find(collect_name, criteria, projection, callback) {
@@ -52,8 +50,8 @@ function deleteMany(collect_name, criteria, options, callback) {
 }
 
 module.exports = {
-	find: find,
-	insert: insert,
-	update: update,
-	deleteMany: deleteMany
+  find: find,
+  insert: insert,
+  update: update,
+  deleteMany: deleteMany
 }
