@@ -181,7 +181,7 @@ var DiaryForm = React.createClass({
 
 		buildRate: function(goalType,tdate,rate) {
 			return <div className="form-inline">
-					<label>{DateUtil.viewFormat(tdate, goalType)}</label>
+					<label>Evaluation</label>
 					<select defaultValue={rate} className="form-control" ref="rate">
 						{['',1,2,3,4,5].map(function(val) {
 										return <option value={val} key={val}>{val}</option>;

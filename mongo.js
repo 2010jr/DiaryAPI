@@ -1,7 +1,7 @@
-let db;
-let mongo_client = require('mongodb').MongoClient;
-let assert = require('assert');
-const url = 'mongodb://bluemix:ibmbluemix@ds119768.mlab.com:19768/goal-diary-dev';
+var db;
+var mongo_client = require('mongodb').MongoClient;
+var assert = require('assert');
+var url = 'mongodb://bluemix:ibmbluemix@ds119768.mlab.com:19768/goal-diary-dev';
 
 mongo_client.connect(url, function (err, mongodb) {
   console.log(err);
