@@ -8,6 +8,7 @@ var Calendar = require('./Calendar.react.js');
 
 var CalendarView = React.createClass({
 		propTypes: { 
+				changePage: React.PropTypes.func
 		},
 
 		getDefaultProps: function() {
@@ -49,6 +50,7 @@ var CalendarView = React.createClass({
 					var transferProps = {
 							tdate : this.state.tdate,
 							dataSet : json,
+							changePage: this.props.changePage 
 					};
 		    		ReactDOM.render(<Calendar {...transferProps} />, this.refs.calendar);
 				}.bind(this));

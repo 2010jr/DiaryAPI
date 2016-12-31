@@ -75,6 +75,7 @@ var PageView = React.createClass({
   },
 
   changePage: function(pageType, goalType, date) {
+	console.log("Change page is invoked");
     if (!goalType) {
       goalType = this.state.goalType;
     }

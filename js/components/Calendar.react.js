@@ -8,6 +8,7 @@ var Calendar = React.createClass({
 		propTypes: {
 				tdate : React.PropTypes.object,
 				dataSet : React.PropTypes.array,
+				changePage : React.PropTypes.func
 		},
 
 		getDefaultProps: function() {
@@ -26,8 +27,6 @@ var Calendar = React.createClass({
 		componentDidMount: function() {
 			var sDate = DateUtil.format(DateUtil.thisMonthFirstDate(this.props.tdate),"day");
 				eDate = DateUtil.format(DateUtil.nextMonthFirstDate(this.props.tdate),"day");
-			console.log("start date is " + sDate);
-			console.log("end date is " + eDate);
 
 			this.buildCalendar("#Calendar", sDate, eDate, 50);
 			this.updateCalendar(this.props.dataSet);
@@ -91,10 +90,7 @@ var Calendar = React.createClass({
 					$("div.tooltip").empty();
 			});
 			rect.on("click", function(d) {
-					//TODO
-					//Write to update container code 
-					console.log("Click is invoked");
-					console.log(d);
+					that.props.changePage("Diary", "day", DateUtil.parse(d,"day"));
 			});
 		},
 
