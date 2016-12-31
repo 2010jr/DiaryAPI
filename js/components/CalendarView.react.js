@@ -22,7 +22,7 @@ var CalendarView = React.createClass({
 		},
 
 		handleChangeDate : function(event) {
-				var changedDate = D3Util.month_format.parse(event.target.value);
+				var changedDate = DateUtil.parse(event.target.value,"day");
 				this.setState({
 						tdate: changedDate, 
 				});
@@ -34,9 +34,9 @@ var CalendarView = React.createClass({
 		},
 
 		getDiaryAndUpdate : function(tDate) {
-				var sDate = DateUtil.nextMonthFirstDate(tDate),
-					eDate = DateUtil.thisMonthFirstDate(tDate);
-				var reqUrl = "diary/?" + "type[$eq]=day" + "&date[$gte]=" + D3Util.dateFormat(sDate) + "&date[$lt]=" + D3Util.dateFormat(eDate),
+				var sDate = DateUtil.thisMonthFirstDate(tDate),
+					eDate = DateUtil.nextMonthFirstDate(tDate);
+				var reqUrl = "diary/?" + "type[$eq]=day" + "&date[$gte]=" + DateUtil.format(sDate,"day") + "&date[$lt]=" + DateUtil.format(eDate,"day"),
 					days = (365 + d3.time.dayOfYear(eDate) - d3.time.dayOfYear(sDate)) % 365;
 
 				d3.json(reqUrl, function(error, json) { 

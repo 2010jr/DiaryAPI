@@ -1,6 +1,7 @@
 var React = require('react');
 var ReactPropTypes = React.PropTypes;
 var D3Util = require('../D3Util');
+var DateUtil= require('../DateUtil');
 var d3 = require('d3');
 
 var Calendar = React.createClass({
@@ -18,14 +19,15 @@ var Calendar = React.createClass({
 
 		render : function() {
 			return <div>
-					<p>{D3Util.month_format(this.props.tdate)}</p>
 					<div id="Calendar"></div>
 				   </div>;
 		},
 
 		componentDidMount: function() {
-			var sDate = D3Util.date_format(D3Util.nextMonthFirstDate(this.props.tdate)),
-				eDate = D3Util.date_format(D3Util.thisMonthFirstDate(this.props.tdate));
+			var sDate = DateUtil.format(DateUtil.thisMonthFirstDate(this.props.tdate),"day");
+				eDate = DateUtil.format(DateUtil.nextMonthFirstDate(this.props.tdate),"day");
+			console.log("start date is " + sDate);
+			console.log("end date is " + eDate);
 
 			this.buildCalendar("#Calendar", sDate, eDate, 50);
 			this.updateCalendar(this.props.dataSet);
@@ -44,7 +46,7 @@ var Calendar = React.createClass({
 			if( !dataSet || !Array.isArray(dataSet) || dataSet.length === 0) {
 					return;
 			}
-			var today = D3Util.date_format(new Date()),
+			var today = DateUtil.format(new Date(),"day"),
 				that = this, 
 			    data = d3.nest()
 						 .key(function(d) { return d.date;})

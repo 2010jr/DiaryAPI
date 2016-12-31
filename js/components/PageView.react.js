@@ -12,12 +12,11 @@ var PageView = React.createClass({
       "Diary" : DiaryForm ,
       "Goal" : GoalForm ,
       "Calendar" : CalendarView ,
-      "List" : DiarySummary 
     }
   },
 
   propTypes: {
-    defaultPageType: React.PropTypes.oneOf(["Diary","Goal","List","Calendar"]).isRequired,
+    defaultPageType: React.PropTypes.oneOf(["Diary","Goal","Calendar"]).isRequired,
     defaultGoalType: React.PropTypes.string.isRequired
   },
   
@@ -61,7 +60,8 @@ var PageView = React.createClass({
   },
 
   componentDidMount: function() {
-    var props = { tdate: this.state.tdate, 
+    var props = { 
+		tdate: this.state.tdate, 
         goalType: this.state.goalType,
         changePage: this.changePage
     };

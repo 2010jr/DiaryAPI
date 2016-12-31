@@ -47,13 +47,13 @@ var d3Util = function() {
 								.attr("width", cellsize)
 								.attr("height", cellsize)
 								.attr("x", function(d) {
-										return parseInt(DateUtil.dayOfMonth(d)) * cellsize; 
+										return parseInt(DateUtil.dayOfWeek(d)) * cellsize; 
 								})
 						.attr("y", function(d) { 
 								var weekDiff = DateUtil.weekOfMonth(d); 
 								return weekDiff * cellsize; 
 						})
-						.datum(DateUtil.dateFormat);
+						.datum(function(date) { return DateUtil.format(date,"day")});
 						return rect;
 				},
 				
@@ -61,14 +61,14 @@ var d3Util = function() {
 						var daytext = dayGroup 
 								.append("text")
 								.attr("x", function(d) {
-										return parseInt(DateUtil.dayOfMonth(d)) * cellsize + cellsize * 0.3;
+										return parseInt(DateUtil.dayOfWeek(d)) * cellsize + cellsize * 0.3;
 								})
 								.attr("y", function(d) { 
 										var weekDiff = DateUtil.weekOfMonth(d); 
 										return weekDiff * cellsize + cellsize * 0.6; 
 								})
 								.attr("class", "day-title")
-								.text( function(d) { return DateUtil.dayOfMonth(d)});
+								.text( function(d) { return DateUtil.dayOfMonth(d) });
 						return daytext;
 				},
 				
