@@ -36,7 +36,12 @@ var Calendar = React.createClass({
 				var svg = D3Util.buildCalendarSvg(selector,sDate, eDate, cellsize);
 				var weekTitle = D3Util.buildWeekTitle(svg, cellsize);
 				var dayGroup = D3Util.buildDayGroup(svg);
-				var rect = D3Util.buildRect(dayGroup, cellsize); 
+				var rectOnFunc = {
+						"click": function (d) {
+							console.log("mouse on click data : " + d);
+						}
+				};
+				var rect = D3Util.buildRect(dayGroup, cellsize, rectOnFunc); 
 				var daytext = D3Util.buildDayText(dayGroup, cellsize);
 				var tooltip = D3Util.buildToolTip(selector, "tooltip");
 		},

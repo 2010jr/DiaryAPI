@@ -53,11 +53,18 @@ var DiaryForm = React.createClass({
 				return {
 						message : "目標が未設定です。日記を書くために目標設定を行いましょう",
 						linksToAct: [{
-								name : "目標設定しますか？",
-								func : function() { 
-										_this.props.changePage("Goal", _this.props.goalType, _this.props.tdate);
+									name : "目標設定しますか？",
+									func : function() { 
+											_this.props.changePage("Goal", _this.props.goalType, _this.props.tdate);
+									}
+								},
+								{
+									name : "他の日記をつけますか？",
+									func : function() {
+											// Do nothing
+									}
 								}
-						}]
+						]
 				};
 		},
 

@@ -7,7 +7,8 @@
     "build": "browserify --debug js/index.js > public/bundle.js",
     "build-dist": "NODE_ENV=production browserify js/index.js | uglifyjs -m > public/bundle.min.js",
     "watch": "watchify -v --debug js/index.js -o public/bundle.js",
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "mocha"
   },
   "browserify": {
     "transform": [
@@ -48,11 +49,13 @@
     "jquery": "~3.1.1"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
     "eslint": "^3.12.2",
     "eslint-config-airbnb": "^13.0.0",
     "eslint-config-eslint": "^3.0.0",
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^2.2.3",
-    "eslint-plugin-react": "^6.8.0"
+    "eslint-plugin-react": "^6.8.0",
+    "mocha": "^3.2.0"
   }
 }
