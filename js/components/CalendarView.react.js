@@ -37,15 +37,13 @@ var CalendarView = React.createClass({
 		getDiaryAndUpdate : function(tDate) {
 				var sDate = DateUtil.thisMonthFirstDate(tDate),
 					eDate = DateUtil.nextMonthFirstDate(tDate);
-				var reqUrl = "diary/?" + "type[$eq]=day" + "&date[$gte]=" + DateUtil.format(sDate,"day") + "&date[$lt]=" + DateUtil.format(eDate,"day"),
-					days = (365 + d3.time.dayOfYear(eDate) - d3.time.dayOfYear(sDate)) % 365;
+				var reqUrl = "diary/?" + "type[$eq]=day" + "&date[$gte]=" + DateUtil.format(sDate,"day") + "&date[$lt]=" + DateUtil.format(eDate,"day");
 
 				d3.json(reqUrl, function(error, json) { 
 					if ( null != error) {
 							console.log(error);
 							return;
 					}	
-					console.log(json);
 					ReactDOM.unmountComponentAtNode(this.refs.calendar);
 					var transferProps = {
 							tdate : this.state.tdate,

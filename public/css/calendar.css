@@ -1,15 +1,16 @@
-.day-off {
-		fill: #FFFFFF;
+rect.past {
+		fill: #dbdbdb;
 		stroke: #EEEEEE;
 }
 
-.day-on {
+/* Prioritize on most */
+rect.on {
 		fill: #FFFFFF;
 		stroke: #111111;
 }
 
-.day-past {
-		fill: #dbdbdb;
+rect.off {
+		fill: #FFFFFF;
 		stroke: #EEEEEE;
 }
 

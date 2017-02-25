@@ -3,69 +3,56 @@ var Const = require('./Constants');
 
 module.exports = function() {
 		// Date Format variables
-		var dayOfWeek = d3.time.format("%w"),
-			dayOfMonth = d3.time.format("%d"), 
-			weekOfYear = d3.time.format("%U"),
+		var dayOfWeek = d3.timeFormat("%w"),
+			dayOfMonth = d3.timeFormat("%d"), 
+			weekOfYear = d3.timeFormat("%U"),
+			monthOfYear = d3.timeFormat("%m"), //Note Janually is 1
+			year = d3.timeFormat("%Y"), 
 			weekOfMonth =  function(date) {
-					var thisYear = parseInt(yearFormat(date)),
+					var thisYear = parseInt(year(date)),
 					thisMonth = parseInt(monthOfYear(date));
 					return parseInt(weekOfYear(date)) - parseInt(weekOfYear(new Date(thisYear,thisMonth-1,1))) + 1;
 			},
-			monthOfYear = d3.time.format("%m"), //Note Janually is 1
-			yearFormat = d3.time.format("%Y"),
-			dayFormat = d3.time.format("%Y-%m-%d"),
-			monthFormat= d3.time.format("%Y-%m"),
-			weekFormat= d3.time.format("%Y-W%U"),
 			FORMAT_TYPES = Const.GOAL_TYPES, 
 			VIEW_FORMAT_TYPES = Const.GOAL_TYPES; 
 
 		var FORMAT_FUNC_MAP = {
-				"year" : yearFormat,
-				"quarter" : monthFormat, 
-				"month" : monthFormat,
-				"week" : weekFormat,
-				"day" : dayFormat
-		},
-		VIEW_FORMAT_FUNC_MAP = {
-				"year" : yearFormat,
-				"quarter" : monthFormat, 
-				"month" : monthFormat,
-				"week" : function(date) { return monthFormat(date) + "-Week " + weekOfMonth(date);},
-				"day" : dayFormat
+				"year" : year, 
+				"month" : d3.timeFormat("%Y-%m"),
+				"week" : d3.timeFormat("%Y-W%U"),
+				"day" : d3.timeFormat("%Y-%m-%d"),
 		};
 
+		var PARSE_FUNC_MAP = {
+				"year" : d3.timeParse("%Y"),
+				"month" : d3.timeParse("%Y-%m"),
+				"week" : d3.timeParse("%Y-W%U"),
+				"day" : d3.timeParse("%Y-%m-%d"),
+		}
+		
 		return {
-				dayOfWeek : dayOfWeek,
-				dayOfMonth : dayOfMonth,
-				monthOfYear: monthOfYear,
-				fullYear: yearFormat,
+				dayOfWeek: dayOfWeek,
+				dayOfMonth: dayOfMonth,
 				weekOfMonth: weekOfMonth,
 				parse : function(date, formatType) {
-					var formatObj = FORMAT_FUNC_MAP[formatType];
-					return formatObj ? formatObj.parse(date) : null;
+					var formatObj = PARSE_FUNC_MAP[formatType];
+					return formatObj ? formatObj(date) : null;
 				},
 				format : function(date, formatType) { 
 					// It's hard to judge date object so judging by having getFullYear method or not	
-					if (-1 === FORMAT_TYPES.indexOf(formatType)) {
-							throw new Error("argument 'formatType' must be one of " + FORMAT_TYPES);
-					}
 					var formatObj = FORMAT_FUNC_MAP[formatType];
 					return formatObj ? formatObj(date) : null;
 				},
-				viewFormat: function(date, formatType) {
-					if (-1 === VIEW_FORMAT_TYPES.indexOf(formatType)) {
-							throw new Error("argument 'formatType' must be one of " + VIEW_FORMAT_TYPES);
-					}
-					var formatObj = VIEW_FORMAT_FUNC_MAP[formatType];
-					return formatObj ? formatObj(date) : null;
+				nextMonthFirstDate: function(date) { return new Date(year(date), parseInt(monthOfYear(date)) - 1 + 1, 1);},
+				thisMonthFirstDate: function(date) { return new Date(year(date), parseInt(monthOfYear(date)) - 1, 1);},
+				sunday : function(date) {
+						return new Date(year(date), parseInt(monthOfYear(date)) - 1, parseInt(dayOfMonth(date)) - dayOfWeek(date))
 				},
-				nextMonthFirstDate: function(date) { return new Date(yearFormat(date), parseInt(monthOfYear(date)) - 1 + 1, 1);},
-				thisMonthFirstDate: function(date) { return new Date(yearFormat(date), parseInt(monthOfYear(date)) - 1, 1);},
 				offsetDate: function(date, formatType, offset) {
 						if (-1 === FORMAT_TYPES.indexOf(formatType)) {
 								throw new Error("argument 'formatType' must be one of " + FORMAT_TYPES);
 						}
-						var yearNum = parseInt(yearFormat(date)),
+						var yearNum = parseInt(year(date)),
 							monthNum = parseInt(monthOfYear(date)) - 1,
 							dayNum = parseInt(dayOfMonth(date));
 						switch (formatType)  {

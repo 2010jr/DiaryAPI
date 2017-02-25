@@ -26,7 +26,10 @@ module.exports = function() {
 				if (-1 === GOAL_TYPES.indexOf(goalType)) {
 						throw new Error("argument 'goalType' must be one of " + GOAL_TYPES);
 				}
-				var url = "/" + resourceType + "/" + goalType + "/" + DateUtil.format(tdate,goalType);
+				var url = "/" + resourceType + "/" + goalType;
+			    if(tdate) {
+					url	+= "/" + DateUtil.format(tdate,goalType);
+				}
 				if(otherQuery) {
 						url += "?" + otherQuery;
 				}
