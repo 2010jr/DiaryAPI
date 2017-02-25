@@ -34,12 +34,20 @@ module.exports = function() {
 				dayOfWeek: dayOfWeek,
 				dayOfMonth: dayOfMonth,
 				weekOfMonth: weekOfMonth,
-				parse : function(date, formatType) {
+				parse : function(dateStr, formatType) {
 					var formatObj = PARSE_FUNC_MAP[formatType];
-					return formatObj ? formatObj(date) : null;
+					var date = formatObj ? formatObj(dateStr) : null;
+					if (date) {
+							// This is ugly hack but week parse didn't work 
+							if ("week" === formatType) {
+									return d3.timeDay.offset(date,7);
+							} else {
+									return date;
+							}
+					}
+					return null;	
 				},
 				format : function(date, formatType) { 
-					// It's hard to judge date object so judging by having getFullYear method or not	
 					var formatObj = FORMAT_FUNC_MAP[formatType];
 					return formatObj ? formatObj(date) : null;
 				},
@@ -52,21 +60,15 @@ module.exports = function() {
 						if (-1 === FORMAT_TYPES.indexOf(formatType)) {
 								throw new Error("argument 'formatType' must be one of " + FORMAT_TYPES);
 						}
-						var yearNum = parseInt(year(date)),
-							monthNum = parseInt(monthOfYear(date)) - 1,
-							dayNum = parseInt(dayOfMonth(date));
 						switch (formatType)  {
 								case "year" :
-										return new Date(yearNum + offset, monthNum, dayNum);
-								case "quarter" :
-										var offsetMonth = parseInt(offset) * 3;
-										return new Date(yearNum, monthNum + offsetMonth, dayNum);
+										return d3.timeYear.offset(date, offset); 
 								case "month" : 
-										return new Date(yearNum, monthNum + offset, dayNum); 
+										return d3.timeMonth.offset(date, offset); 
 								case "week" : 
-										return new Date(yearNum, monthNum, dayNum + offset * 7);
+										return d3.timeWeek.offset(date, offset); 
 								case "day" : 
-										return new Date(yearNum, monthNum , dayNum + offset);
+										return d3.timeDay.offset(date, offset); 
 								default :
 										return null;
 						}

@@ -34,7 +34,7 @@ var d3Util = function() {
 						var dayGroup = frame.selectAll("g")
 								.data(function(d) { return d3.timeDays(d, DateUtil.nextMonthFirstDate(d)); })
 								.enter().append("g"),
-							today = new Date();
+							today = DateUtil.format(new Date(),"day");
 						
 						// Building rectangular for each date
 						dayGroup.append("rect")

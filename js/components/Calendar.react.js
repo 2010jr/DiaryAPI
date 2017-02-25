@@ -33,6 +33,7 @@ var Calendar = React.createClass({
 			this.buildCalendarFrame("#Calendar", sDate, eDate, 50);
 			["month", "week", "day"].forEach(function(goalType) {
 					var query = "&date[$gte]=" + DateUtil.format(sDate,goalType)+ "&date[$lt]=" + DateUtil.format(eDate,goalType);
+					console.log(query);
 					AjaxUtil.getDiaries(goalType, null, query, function(error,json) {
 							D3Util.coloringRectByDiaries(json, new Date(), goalType, changePageFunc);
 					});
