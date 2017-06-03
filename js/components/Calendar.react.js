@@ -8,14 +8,12 @@ var d3 = require('d3');
 var Calendar = React.createClass({
 		propTypes: {
 				tdate : React.PropTypes.object,
-				dataSet : React.PropTypes.array,
 				changePage : React.PropTypes.func
 		},
 
 		getDefaultProps: function() {
 				return {
 						tdate : new Date(),
-						dataSet : [],
 				}
 		},
 
@@ -33,7 +31,6 @@ var Calendar = React.createClass({
 			this.buildCalendarFrame("#Calendar", sDate, eDate, 50);
 			["month", "week", "day"].forEach(function(goalType) {
 					var query = "&date[$gte]=" + DateUtil.format(sDate,goalType)+ "&date[$lt]=" + DateUtil.format(eDate,goalType);
-					console.log(query);
 					AjaxUtil.getDiaries(goalType, null, query, function(error,json) {
 							D3Util.coloringRectByDiaries(json, new Date(), goalType, changePageFunc);
 					});
@@ -47,13 +44,6 @@ var Calendar = React.createClass({
 				var weekRect = D3Util.buildWeekRect(svg, sDate, eDate, cellsize);
 				var monthTitle = D3Util.buildMonthTitle(svg, cellsize);
 				var tooltip = D3Util.buildToolTip(selector, "tooltip");
-		},
-
-		updateCalendar : function(dataSet) {
-			if( !dataSet || !Array.isArray(dataSet) || dataSet.length === 0) {
-					return;
-			}
-			D3Util.coloringRectByDiaries(dataSet, new Date(), "day", this.props.changePage);
 		},
 
 		componentWillUnmount : function() {

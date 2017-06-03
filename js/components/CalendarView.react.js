@@ -22,39 +22,48 @@ var CalendarView = React.createClass({
 				};
 		},
 
-		handleChangeDate : function(event) {
-				var changedDate = DateUtil.parse(event.target.value,"day");
+		handleChangeDate : function(offset) {
+				var monthOfYear = this.state.tdate.getMonth(),
+					year = this.state.tdate.getFullYear();
+				var newDate = new Date(year,monthOfYear + offset, 1);
 				this.setState({
-						tdate: changedDate, 
+						tdate: newDate,
 				});
-				this.getDiaryAndUpdate(changedDate);
 		},
 
 		render: function() {
-				return <div ref="calendar"></div>;
+				that = this;
+				return <div>
+						<div className="center-block">
+							<div className="col-md-2"/>
+							<button type="button" className="btn btn-link" onClick={that.handleChangeDate.bind(that,-1)}>
+								<span className="glyphicon glyphicon-chevron-left" aria-hidden="true"/>
+							</button>
+							<button type="button" className="btn btn-link" onClick={that.handleChangeDate.bind(that,1)}>
+								<span className="glyphicon glyphicon-chevron-right" aria-hidden="true"/>
+							</button>
+						</div>
+						<div ref="calendar"></div>
+					   </div>;
 		},
 
 		getDiaryAndUpdate : function(tDate) {
 				var sDate = DateUtil.thisMonthFirstDate(tDate),
 					eDate = DateUtil.nextMonthFirstDate(tDate);
-				var reqUrl = "diary/?" + "type[$eq]=day" + "&date[$gte]=" + DateUtil.format(sDate,"day") + "&date[$lt]=" + DateUtil.format(eDate,"day");
-
-				d3.json(reqUrl, function(error, json) { 
-					if ( null != error) {
-							console.log(error);
-							return;
-					}	
-					ReactDOM.unmountComponentAtNode(this.refs.calendar);
-					var transferProps = {
-							tdate : this.state.tdate,
-							dataSet : json,
-							changePage: this.props.changePage 
-					};
-		    		ReactDOM.render(<Calendar {...transferProps} />, this.refs.calendar);
-				}.bind(this));
+				console.log("getDiaryAndUpdate is invoked");
+				ReactDOM.unmountComponentAtNode(this.refs.calendar);
+				var transferProps = {
+						tdate : this.state.tdate,
+						changePage: this.props.changePage 
+				};
+		   		ReactDOM.render(<Calendar {...transferProps} />, this.refs.calendar);
 		},
-		
+
 		componentDidMount: function() {
+				this.getDiaryAndUpdate(this.state.tdate);
+		},
+
+		componentDidUpdate: function() {
 				this.getDiaryAndUpdate(this.state.tdate);
 		},
 });

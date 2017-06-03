@@ -139,7 +139,7 @@ var d3Util = function() {
 						// Registering mouse event 
 						allRect.on("mouseover", function(d) {
 								var className = d3.select(this).attr("class");
-								d3.select(this).attr("class", className.replace("off", "on"));
+								d3.select(this).attr("class", className.replace(/\boff\b/, "on"));
 
 								if (diaryMap[d]) {
 										tooltip.style("visibility", "visible");
@@ -154,7 +154,7 @@ var d3Util = function() {
 
 						allRect.on("mouseout", function(d) {
 								var className = d3.select(this).attr("class");
-								d3.select(this).attr("class",className.replace("on", "off"));
+								d3.select(this).attr("class",className.replace(/\bon\b/, "off"));
 
 								tooltip.transition()
 										.duration(100)

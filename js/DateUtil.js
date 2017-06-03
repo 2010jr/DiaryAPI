@@ -31,6 +31,7 @@ module.exports = function() {
 		}
 		
 		return {
+				monthOfYear: monthOfYear,
 				dayOfWeek: dayOfWeek,
 				dayOfMonth: dayOfMonth,
 				weekOfMonth: weekOfMonth,
