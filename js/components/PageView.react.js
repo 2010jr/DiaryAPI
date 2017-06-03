@@ -43,13 +43,18 @@ var PageView = React.createClass({
   },
 
   buildHeader: function () {
-    return <nav aria-label="...">
-      <ul className="pager">
-      <li><a onClick={this.goToPrevDate}><span aria-hidden="true">&larr;</span></a></li>
-      <li>{DateUtil.format(this.state.tdate, this.state.goalType)}</li>
-      <li><a onClick={this.goToNextDate}><span aria-hidden="true">&rarr;</span></a></li>
-      </ul>
-      </nav>;
+	if ("Calendar" == this.state.pageType) {
+			// We use Calendar specific navigator so we don't need common nav
+			return <nav aria-label="..."></nav>;
+	} else {
+    		return <nav aria-label="...">
+    		  <ul className="pager">
+    		  <li><a onClick={this.goToPrevDate}><span aria-hidden="true">&larr;</span></a></li>
+    		  <li>{DateUtil.format(this.state.tdate, this.state.goalType)}</li>
+    		  <li><a onClick={this.goToNextDate}><span aria-hidden="true">&rarr;</span></a></li>
+    		  </ul>
+    		  </nav>;
+	}
   },
 
   render: function() {
