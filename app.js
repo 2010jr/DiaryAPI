@@ -1,16 +1,16 @@
-'use strict'
+const express = require('express');
+const cfEnv = require('cfenv');
+const db = require('./db/mongo');
+const routes = require('./routes/routes');
+const log = require('./log/logger');
 
-var http = require('http');
-var express = require('express');
-var cfEnv = require('cfenv');
+const appEnv = cfEnv.getAppEnv();
+const port = appEnv && appEnv.port ? appEnv.port : 3000;
 
-var routes = require('./routes/routes');
-var app = express();
-var appEnv = cfEnv.getAppEnv();
-var server = http.createServer(app);
-var port = appEnv && appEnv.port ? appEnv.port : 3000;
+const app = express();
+const { Db } = db;
+log.info('Invoke Router');
+routes.router(app, new Db());
+app.listen(port);
 
-routes.router(app, server);
-server.listen(port);
-
-console.log('Listening on port %d in %s mode', port, app.settings.env);
+log.info('Listening on port %d in %s mode', port, app.settings.env);
