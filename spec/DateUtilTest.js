@@ -1,6 +1,6 @@
 var assert = require('assert');
 var chai = require('chai');
-var dateUtil = require('../js/DateUtil');
+var dateUtil = require('../src/js/DateUtil');
 
 describe("DateUtil", function() {
 	   describe("parse", function() {

@@ -41,4 +41,5 @@ if (process.env.NODE_ENV !== 'production') {
     humanReadableUnhandledException: true,
   }));
 }
+
 module.exports = logger;

@@ -1,5 +1,5 @@
 {
-	"url": "mongodb://bluemix:ibmbluemix@ds119768.mlab.com:19768/goal-diary-dev--",
+	"url": "mongodb://bluemix:ibmbluemix@ds119768.mlab.com:19768/goal-diary-dev",
 	"poolSize": 10,
 	"ssl": false
 }

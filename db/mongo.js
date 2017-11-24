@@ -3,56 +3,48 @@ const log = require('../log/logger');
 const mongoParam = require('./mongo_param.json');
 
 class Db {
-  constructor(url = mongoParam.url, options = mongoParam) {
-    new Promise((resolve, reject) => {
-      MongoClient.connect(url, options, (err, mongodb) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(mongodb);
-        }
-      });
-    }).then((mongodb) => {
-      log.info(`Successfully connected to mongodb:${mongodb.databaseName}`);
-      this.db = mongodb;
-    }, (err) => {
-      const serializedErr = JSON.stringify(err);
-      log.error(`Failed to connect to MongoDB. Error:${serializedErr}`);
-      log.error(err.stack);
-    }).catch((reason) => {
-      log.error('Error some thing happened during db connection');
-      log.error(reason);
+  static createDbPromise(url = mongoParam.url, options = mongoParam) {
+    return MongoClient.connect(url, options);
+  }
+
+  constructor(dbPromise) {
+    this.dbPromise = dbPromise;
+    this.logLabel = { label: 'db' };
+    dbPromise.then((mongodb) => {
+      log.info(`Successfully connected to mongodb:${mongodb.databaseName}`, this.logLabel);
     });
   }
 
-  find(collectionName, criteria, projection, callback) {
-    // TODO: Error handling should be added
-    this.db.collection(collectionName, (outerErr, collection) => {
-      collection.find(criteria, projection).toArray((innerErr, list) => {
-        callback(list);
+  find(collectionName, criteria) {
+    return this.dbPromise
+      .then(db => db.collection(collectionName).find(criteria).toArray())
+      .catch((error) => {
+        log.error(`Failed to find in collection name:${collectionName} and criteria:${criteria}`, this.logLabel);
+        log.error(`Reason : ${error.message}`);
+        log.error(error.stack);
+        Promise.reject(error);
       });
-    });
   }
-  insert(collectName, document, options, callback) {
-    this.db.collection(collectName, (outerErr, collection) => {
-      collection.insert(document, (innerErr, result) => {
-        callback(result);
+
+  insert(collectionName, document) {
+    this.dbPromise
+      .then(db => db.collection(collectionName).insert(document))
+      .catch((error) => {
+        log.error(`Failed to insert document:${document} in collection:${collectionName}`, this.logLabel);
+        log.error(`Reason : ${error.message}`, this.logLabel);
+        log.error(error.stack);
+        Promise.reject(error);
       });
-    });
   }
-  deleteMany(collectName, criteria, options, callback) {
-    this.db.collection(collectName, (outerErr, collection) => {
-      collection.deleteMany(criteria, options, (innerErr, result) => {
-        callback(result);
-      });
-    });
+
+  deleteMany(collectionName, criteria, options) {
+    this.dbPromise
+      .then(db => db.collection(collectionName).deleteMany(criteria, options));
   }
-  update(collectName, criteria, document, options, callback) {
-    this.db.collection(collectName, (outerErr, collection) => {
-      collection.update(criteria, document, options, (innerErr, result) => {
-        callback(result);
-      });
-    });
+
+  update(collectionName, criteria, document, options) {
+    this.dbPromise
+      .then(db => db.collection(collectionName).update(criteria, document, options));
   }
 }
 

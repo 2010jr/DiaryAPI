@@ -9,9 +9,7 @@
     "watch": "watchify -v --debug js/index.js -o public/bundle.js",
     "start": "node app.js",
     "start_debug": "node debug app.js",
-    "test_jest": "jest",
-    "test_mocha": "mocha",
-    "test_mocha_debug": "mocha --debug-brk --inspect"
+    "test": "jest"
   },
   "browserify": {
     "transform": [

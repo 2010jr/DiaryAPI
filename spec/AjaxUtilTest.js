@@ -1,6 +1,6 @@
 var assert = require('assert');
 var chai = require('chai');
-var ajaxUtil = require('../js/AjaxUtil');
+var ajaxUtil = require('../src/js/AjaxUtil');
 
 describe("AjaxUtil", function() {
 		describe("buildURL", function() {
