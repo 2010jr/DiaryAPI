@@ -29,7 +29,7 @@ class Db {
   }
 
   insert(collectionName, document) {
-    this.dbPromise
+    return this.dbPromise
       .then((db) => {
         log.info(`Insert document:${document} to collection:${collectionName}`);
         return db.collection(collectionName).insert(document);
@@ -43,10 +43,11 @@ class Db {
   }
 
   deleteMany(collectionName, criteria, options) {
-    this.dbPromise
+    return this.dbPromise
       .then((db) => {
         log.info(`Delete document by criteria ${criteria} to collection:${collectionName}`);
-        return db.collection(collectionName).deleteMany(criteria, options);
+        const promise = db.collection(collectionName).deleteMany(criteria, options);
+        return promise;
       })
       .catch((error) => {
         log.error(`Failed to delete document by criteria:${criteria} in collection:${collectionName}`);
@@ -57,7 +58,7 @@ class Db {
   }
 
   update(collectionName, criteria, document, options) {
-    this.dbPromise
+    return this.dbPromise
       .then((db) => {
         log.info(`Update document:${document} by criteria ${criteria} in collection:${collectionName}`);
         return db.collection(collectionName).update(criteria, document, options);

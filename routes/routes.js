@@ -109,7 +109,7 @@ const router = (app, db) => {
       }).then(() => {
         return db.insert('goal', dataSet);
       }).then((result) => {
-        req.send(result);
+        res.send(result);
       });
     } else {
       const criteria = {
