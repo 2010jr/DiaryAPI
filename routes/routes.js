@@ -2,12 +2,12 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const account = require('../config/account.json');
 const path = require('path');
-const log = require('../log/logger');
+const log = require('../log/logger').createLogger('route');
 
 function authenticate(res) {
   const realm = 'Diary App';
   res.writeHead(401, {
-    'WWW-Authenticate': 'Basic realm="' + realm + '"',
+    'WWW-Authenticate': `Basic realm=${realm}`,
   });
   return res.end('Basic authorization');
 }
@@ -36,98 +36,95 @@ function basicAuthenticate(req, res, next) {
   }
 }
 
-const router = function (app, db) {
+const router = (app, db) => {
   app.use(basicAuthenticate);
   app.use(bodyParser.urlencoded({ extended: false }));
   app.use(bodyParser.json());
   app.use(express.static(path.resolve(__dirname, '../public')));
-  app.use(function (err, req, res, next) {
-    log.error(error(err.stack));
+  app.use((err, req, res, next) => {
+    log.error(err.stack);
     res.status(500).send('Something broke');
   });
-  app.all('/*', function (req, res, next) {
+  app.all('/*', (req, res, next) => {
     res.contentType('json');
     res.header('Access-Control-Allow-Origin', '*');
     next();
   });
-  app.get('/', function (req, res) {
-    console.log("Root index" + req)
+  app.get('/', (req, res) => {
+    log.info('Request to route is comming, so redirect to index.html');
     res.redirect('/index.html');
   });
-  app.get('/:_diaryOrGoal(diary\|goal)?', function (req, res) {
-    var criteria = { user: extractUserName(req) };
-    for (var props in req.query) {
-      if (req.query.hasOwnProperty(props)) {
-        console.log(req.query[props]);
-        criteria[props] = req.query[props];
-      }
-    }
-    console.log("criteria : " + criteria);
-    db.find(req.params._diaryOrGoal, criteria, {}, function (list) { res.json(list); });
+
+  app.get('/:diaryOrGoal(diary|goal)?', (req, res) => {
+    let criteria = { user: extractUserName(req) };
+    criteria = Object.assign(criteria, req.query);
+    log.info('criteria');
+    log.info(criteria);
+    db.find(req.params.diaryOrGoal, criteria).then((list) => { res.json(list); });
   });
 
-  app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(year\|quarter\|month\|week\|day)/:_date', function (req, res) {
-    db.find(req.params._diaryOrGoal, { user: extractUserName(req), type: req.params._goalType, date: req.params._date }, {},
-      function (list) {
-        res.json(list);
-      }
-    );
-  });
-
-  app.get('/:_diaryOrGoal(diary\|goal)/:_goalType(year\|quarter\|month\|week\|day)?', function (req, res) {
-    console.log("get goal invoked");
-    var criteria = { user: extractUserName(req), type: req.params._goalType };
-    for (var props in req.query) {
-      if (req.query.hasOwnProperty(props)) {
-        console.log(req.query[props]);
-        criteria[props] = req.query[props];
-      }
-    }
-    db.find(req.params._diaryOrGoal, criteria, {},
-      function (list) {
-        res.json(list);
-      }
-    );
-  });
-
-
-  app.post('/diary', function (req, res) {
-    var criteria = {
+  app.get('/:diaryOrGoal(diary|goal)/:goalType(year|quarter|month|week|day)/:date', (req, res) => {
+    const criteria = {
       user: extractUserName(req),
-      date: req.body.date
+      type: req.params.goalType,
+      date: req.params.date,
     };
-    var data = req.body;
+
+    db.find(req.params.diaryOrGoal, criteria).then((list) => {
+      res.json(list);
+    });
+  });
+
+  app.get('/:diaryOrGoal(diary|goal)/:goalType(year|quarter|month|week|day)?', (req, res) => {
+    let criteria = { user: extractUserName(req), type: req.params.goalType };
+    criteria = Object.assign(criteria, req.query);
+    db.find(req.params.diaryOrGoal, criteria).then((list) => { res.json(list); });
+  });
+
+
+  app.post('/diary', (req, res) => {
+    const criteria = {
+      user: extractUserName(req),
+      date: req.body.date,
+    };
+    const data = req.body;
     data.user = extractUserName(req);
 
-    db.update('diary', criteria, req.body, { upsert: true }, function (result) { res.send(result); });
+    db.update('diary', criteria, req.body, { upsert: true }).then((result) => { res.send(result); });
   });
 
 
-  app.post('/goal', function (req, res) {
+  app.post('/goal', (req, res) => {
     if (Array.isArray(req.body)) {
-      var user = extractUserName(req);
-      var ids = req.body.map(function (val) { return val._id; });
-      var dataSet = req.body.map(function (val) { val.user = user; return val });
+      const user = extractUserName(req);
+      const ids = req.body.map(content => content._id);
+      const dataSet = req.body.map((content) => {
+        const data = Object.assign({}, content);
+        data.user = user;
+        return data;
+      });
 
-      db.deleteMany('goal', { _id: { $in: ids } }, function (result) {
-        db.insert('goal', dataSet, {}, function (result) {
-          res.send(result);
-        });
+      db.deleteMany('goal', { _id: { $in: ids } }).then((result) => {
+        log.info(`Deleted ${result.length} goal`);
+      }).then(() => {
+        return db.insert('goal', dataSet);
+      }).then((result) => {
+        req.send(result);
       });
     } else {
-      var criteria = {
+      const criteria = {
         user: extractUserName(req),
-        date: req.body.date
+        date: req.body.date,
       };
-      var data = req.body;
+      const data = req.body;
       data.user = extractUserName(req);
-      db.update('goal', criteria, data, { upsert: true }, function (result) { res.send(result); });
+      db.update('goal', criteria, data, { upsert: true }).then((result) => { res.send(result); });
     }
   });
 
-  app.delete('/:_diaryOrGoal(diary\|goal)', function (req, res) {
-    db.deleteMany(req.params._diaryOrGoal, req.body, function (result) { res.send(result); });
+  app.delete('/:diaryOrGoal(diary|goal)', (req, res) => {
+    db.deleteMany(req.params.diaryOrGoal, req.body).then((result) => { res.send(result); });
   });
 };
 
-module.exports = { router: router };
+module.exports = { router };
